@@ -1,0 +1,6 @@
+[submodule "dependencies/yage"]
+	path = dependencies/yage
+	url = https://github.com/fmmarques/yage.git
+[submodule "dependencies/googletest"]
+	path = dependencies/googletest
+	url = https://github.com/google/googletest.git
