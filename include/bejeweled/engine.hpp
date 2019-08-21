@@ -43,7 +43,7 @@ public:
     continue_execution = false;
   }
 
-}
+};
 	                                                  
 
 }
