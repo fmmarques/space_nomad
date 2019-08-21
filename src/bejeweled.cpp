@@ -6,7 +6,5 @@
 
 int main(int argc, const char *argv[])
 {
-  using namespace yage::graphics;
   
-  graphics_manager::instance().set_window( window("bejeweled", 640, 480) );
 }
