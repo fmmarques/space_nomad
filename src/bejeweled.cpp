@@ -8,6 +8,5 @@ int main(int argc, const char *argv[])
 {
   using namespace yage::graphics;
   
-  window game_window("bejeweled", 640, 480);
-  graphics_manager::instance().set_window( game_window );
+  graphics_manager::instance().set_window( window("bejeweled", 640, 480) );
 }
