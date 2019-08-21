@@ -7,13 +7,13 @@
 namespace bejeweled {
 namespace interface1 {
 
-class engine: public yage::engine::game_engine< engine >,
+class bej_engine: public yage::engine::game_engine< bej_engine >,
 	      public yage::engine::runnable
 {
 private:
   bool continue_execution;
 protected:
-  engine():
+  bej_engine():
     continue_execution{true}
   {
     using namespace yage::graphics;
@@ -23,9 +23,9 @@ protected:
   }
 
 public:
-  static engine& instance() 
+  static bej_engine& instance() 
   {
-    static engine inst{};
+    static bej_engine inst{};
     return inst;
   }
 
@@ -33,8 +33,8 @@ public:
   {
     while (continue_execution)
     {
-      auto current_state = peek();
-      continue_execution = continue_execution & 
+      auto&& current_state = peek();
+      current_state->run();
     }
   }
 
@@ -48,7 +48,6 @@ public:
 
 }
 using namespace interface1;
-}
 }
 
 #endif

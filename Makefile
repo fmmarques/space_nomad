@@ -137,6 +137,19 @@ all_tests/fast:
 .PHONY : all_tests/fast
 
 #=============================================================================
+# Target rules for targets named state_machine_test
+
+# Build rule for target.
+state_machine_test: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 state_machine_test
+.PHONY : state_machine_test
+
+# fast build rule for target.
+state_machine_test/fast:
+	$(MAKE) -f dependencies/yage/CMakeFiles/state_machine_test.dir/build.make dependencies/yage/CMakeFiles/state_machine_test.dir/build
+.PHONY : state_machine_test/fast
+
+#=============================================================================
 # Target rules for targets named yage
 
 # Build rule for target.
@@ -225,6 +238,7 @@ help:
 	@echo "... bejeweled"
 	@echo "... edit_cache"
 	@echo "... all_tests"
+	@echo "... state_machine_test"
 	@echo "... yage"
 	@echo "... graphics_manager_test"
 	@echo "... gtest"
