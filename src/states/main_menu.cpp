@@ -13,7 +13,7 @@ main_menu::main_menu():
   yage::engine::game_state()
   ,options{ "New game", "Continue", "Exit" }
   ,selected_option{option::UNDEFINED}
-  ,background{ yage::graphics::texture_manager::instance().load("assets/main_menu.background.jpg") }
+  ,background{ yage::graphics::texture_manager::instance().load("assets/main_menu.background.1.jpg") }
 {
   yage::input::input_manager::instance().subscribe(this); 
 }
