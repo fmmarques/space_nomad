@@ -4,3 +4,5 @@ CMakeFiles
 Testing
 cmake_install.cmake
 output
+.gdbinit
+build.sh

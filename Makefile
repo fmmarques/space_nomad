@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /home/fmmarques/Documentos/Projects/bejeweled
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/opt/cmake-3.15.2/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/opt/cmake-3.15.2/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -122,6 +122,19 @@ bejeweled: cmake_check_build_system
 bejeweled/fast:
 	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/build
 .PHONY : bejeweled/fast
+
+#=============================================================================
+# Target rules for targets named assets_directory
+
+# Build rule for target.
+assets_directory: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 assets_directory
+.PHONY : assets_directory
+
+# fast build rule for target.
+assets_directory/fast:
+	$(MAKE) -f CMakeFiles/assets_directory.dir/build.make CMakeFiles/assets_directory.dir/build
+.PHONY : assets_directory/fast
 
 #=============================================================================
 # Target rules for targets named all_tests
@@ -228,15 +241,43 @@ src/bejeweled.cpp.s:
 	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/bejeweled.cpp.s
 .PHONY : src/bejeweled.cpp.s
 
+src/states/main_menu.o: src/states/main_menu.cpp.o
+
+.PHONY : src/states/main_menu.o
+
+# target to build an object file
+src/states/main_menu.cpp.o:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/states/main_menu.cpp.o
+.PHONY : src/states/main_menu.cpp.o
+
+src/states/main_menu.i: src/states/main_menu.cpp.i
+
+.PHONY : src/states/main_menu.i
+
+# target to preprocess a source file
+src/states/main_menu.cpp.i:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/states/main_menu.cpp.i
+.PHONY : src/states/main_menu.cpp.i
+
+src/states/main_menu.s: src/states/main_menu.cpp.s
+
+.PHONY : src/states/main_menu.s
+
+# target to generate assembly for a file
+src/states/main_menu.cpp.s:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/states/main_menu.cpp.s
+.PHONY : src/states/main_menu.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
-	@echo "... bejeweled"
 	@echo "... edit_cache"
+	@echo "... bejeweled"
+	@echo "... rebuild_cache"
+	@echo "... assets_directory"
 	@echo "... all_tests"
 	@echo "... state_machine_test"
 	@echo "... yage"
@@ -246,6 +287,9 @@ help:
 	@echo "... src/bejeweled.o"
 	@echo "... src/bejeweled.i"
 	@echo "... src/bejeweled.s"
+	@echo "... src/states/main_menu.o"
+	@echo "... src/states/main_menu.i"
+	@echo "... src/states/main_menu.s"
 .PHONY : help
 
 
