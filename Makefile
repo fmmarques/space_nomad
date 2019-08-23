@@ -137,19 +137,6 @@ assets_directory/fast:
 .PHONY : assets_directory/fast
 
 #=============================================================================
-# Target rules for targets named all_tests
-
-# Build rule for target.
-all_tests: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 all_tests
-.PHONY : all_tests
-
-# fast build rule for target.
-all_tests/fast:
-	$(MAKE) -f dependencies/yage/CMakeFiles/all_tests.dir/build.make dependencies/yage/CMakeFiles/all_tests.dir/build
-.PHONY : all_tests/fast
-
-#=============================================================================
 # Target rules for targets named state_machine_test
 
 # Build rule for target.
@@ -176,17 +163,30 @@ yage/fast:
 .PHONY : yage/fast
 
 #=============================================================================
-# Target rules for targets named graphics_manager_test
+# Target rules for targets named all_tests
 
 # Build rule for target.
-graphics_manager_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 graphics_manager_test
-.PHONY : graphics_manager_test
+all_tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 all_tests
+.PHONY : all_tests
 
 # fast build rule for target.
-graphics_manager_test/fast:
-	$(MAKE) -f dependencies/yage/CMakeFiles/graphics_manager_test.dir/build.make dependencies/yage/CMakeFiles/graphics_manager_test.dir/build
-.PHONY : graphics_manager_test/fast
+all_tests/fast:
+	$(MAKE) -f dependencies/yage/CMakeFiles/all_tests.dir/build.make dependencies/yage/CMakeFiles/all_tests.dir/build
+.PHONY : all_tests/fast
+
+#=============================================================================
+# Target rules for targets named graphics_test
+
+# Build rule for target.
+graphics_test: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 graphics_test
+.PHONY : graphics_test
+
+# fast build rule for target.
+graphics_test/fast:
+	$(MAKE) -f dependencies/yage/CMakeFiles/graphics_test.dir/build.make dependencies/yage/CMakeFiles/graphics_test.dir/build
+.PHONY : graphics_test/fast
 
 #=============================================================================
 # Target rules for targets named gtest
@@ -278,10 +278,10 @@ help:
 	@echo "... bejeweled"
 	@echo "... rebuild_cache"
 	@echo "... assets_directory"
-	@echo "... all_tests"
 	@echo "... state_machine_test"
 	@echo "... yage"
-	@echo "... graphics_manager_test"
+	@echo "... all_tests"
+	@echo "... graphics_test"
 	@echo "... gtest"
 	@echo "... gtest_main"
 	@echo "... src/bejeweled.o"
