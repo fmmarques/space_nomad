@@ -29,7 +29,12 @@ include_directories(AFTER SYSTEM
 set(BEJEWELED_SOURCES 
 	src/bejeweled.cpp
   # states	
-	src/states/main_menu.cpp)
+  	src/states/main_menu.cpp
+	src/states/base_game.cpp
+  # widgets
+        src/widgets/jewel.cpp
+	src/widgets/grid.cpp
+)
 add_executable(bejeweled ${BEJEWELED_SOURCES}) 
 set_property(TARGET bejeweled PROPERTY CXX_STANDARD 17)
 set_target_properties(bejeweled

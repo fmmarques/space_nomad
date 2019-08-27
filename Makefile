@@ -241,6 +241,33 @@ src/bejeweled.cpp.s:
 	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/bejeweled.cpp.s
 .PHONY : src/bejeweled.cpp.s
 
+src/states/base_game.o: src/states/base_game.cpp.o
+
+.PHONY : src/states/base_game.o
+
+# target to build an object file
+src/states/base_game.cpp.o:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/states/base_game.cpp.o
+.PHONY : src/states/base_game.cpp.o
+
+src/states/base_game.i: src/states/base_game.cpp.i
+
+.PHONY : src/states/base_game.i
+
+# target to preprocess a source file
+src/states/base_game.cpp.i:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/states/base_game.cpp.i
+.PHONY : src/states/base_game.cpp.i
+
+src/states/base_game.s: src/states/base_game.cpp.s
+
+.PHONY : src/states/base_game.s
+
+# target to generate assembly for a file
+src/states/base_game.cpp.s:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/states/base_game.cpp.s
+.PHONY : src/states/base_game.cpp.s
+
 src/states/main_menu.o: src/states/main_menu.cpp.o
 
 .PHONY : src/states/main_menu.o
@@ -268,6 +295,60 @@ src/states/main_menu.cpp.s:
 	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/states/main_menu.cpp.s
 .PHONY : src/states/main_menu.cpp.s
 
+src/widgets/grid.o: src/widgets/grid.cpp.o
+
+.PHONY : src/widgets/grid.o
+
+# target to build an object file
+src/widgets/grid.cpp.o:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/grid.cpp.o
+.PHONY : src/widgets/grid.cpp.o
+
+src/widgets/grid.i: src/widgets/grid.cpp.i
+
+.PHONY : src/widgets/grid.i
+
+# target to preprocess a source file
+src/widgets/grid.cpp.i:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/grid.cpp.i
+.PHONY : src/widgets/grid.cpp.i
+
+src/widgets/grid.s: src/widgets/grid.cpp.s
+
+.PHONY : src/widgets/grid.s
+
+# target to generate assembly for a file
+src/widgets/grid.cpp.s:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/grid.cpp.s
+.PHONY : src/widgets/grid.cpp.s
+
+src/widgets/jewel.o: src/widgets/jewel.cpp.o
+
+.PHONY : src/widgets/jewel.o
+
+# target to build an object file
+src/widgets/jewel.cpp.o:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/jewel.cpp.o
+.PHONY : src/widgets/jewel.cpp.o
+
+src/widgets/jewel.i: src/widgets/jewel.cpp.i
+
+.PHONY : src/widgets/jewel.i
+
+# target to preprocess a source file
+src/widgets/jewel.cpp.i:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/jewel.cpp.i
+.PHONY : src/widgets/jewel.cpp.i
+
+src/widgets/jewel.s: src/widgets/jewel.cpp.s
+
+.PHONY : src/widgets/jewel.s
+
+# target to generate assembly for a file
+src/widgets/jewel.cpp.s:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/jewel.cpp.s
+.PHONY : src/widgets/jewel.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -287,9 +368,18 @@ help:
 	@echo "... src/bejeweled.o"
 	@echo "... src/bejeweled.i"
 	@echo "... src/bejeweled.s"
+	@echo "... src/states/base_game.o"
+	@echo "... src/states/base_game.i"
+	@echo "... src/states/base_game.s"
 	@echo "... src/states/main_menu.o"
 	@echo "... src/states/main_menu.i"
 	@echo "... src/states/main_menu.s"
+	@echo "... src/widgets/grid.o"
+	@echo "... src/widgets/grid.i"
+	@echo "... src/widgets/grid.s"
+	@echo "... src/widgets/jewel.o"
+	@echo "... src/widgets/jewel.i"
+	@echo "... src/widgets/jewel.s"
 .PHONY : help
 
 
