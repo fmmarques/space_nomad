@@ -33,18 +33,17 @@ namespace bejeweled {
 
 					jewel_type type = jewel_type::YELLOW;
 
-					type = static_cast<jewel_type>(rand() % JEWEL_TYPES);
+					type = static_cast<jewel_type>(rand() % jewel_type::JEWEL_TYPE_COUNT);
 
 					return jewel(type, "assets/gems.spritesheet.transparent.png", screen, 0, line, column);
 				}
 			public:
 
 				template < unsigned int LINES, unsigned int COLUMNS, unsigned int JEWEL_WIDTH, unsigned int JEWEL_HEIGTH >
-				static void generate_map(std::shared_ptr< jewel> map[8][8], unsigned int subgroups, unsigned int x, unsigned int y)
+				static void generate_map(std::shared_ptr< jewel > map[LINES][COLUMNS], unsigned int subgroups, unsigned int x, unsigned int y)
 				{
-					const uint8_t JEWEL_TYPES = 5;
-					assert(0 <= map_x_pos && map_x_pos <= 640);
-					assert(0 <= map_y_pos && map_y_pos <= 480);
+					assert(0 <= map_x_pos && map_x_pos + JEWEL_WIDTH * COLUMNS <= 640);
+					assert(0 <= map_y_pos && map_y_pos + JEWEL_HEIGTH * LINES  <= 480);
 
 					for (auto&& lin = 0; lin < LINES; lin++)
 						for (auto&& col = 0; col < COLUMNS; col++)
@@ -62,6 +61,7 @@ namespace bejeweled {
 							moving.insert(moving.end(), map[col][lin].get());
 						}
 					}
+					columns_with_free_slots = std::array< int, 8 >{ 0, };
 				}
 
 			};
@@ -79,7 +79,7 @@ namespace bejeweled {
 				std::shared_ptr< jewel > map[8][8];
 
 				/// the counter of free slot per column
-				std::array< uint32_t, 8 > columns_with_free_slots;
+				std::array< int, 8 > columns_with_free_slots;
 
 				/// the jewels in motion
 				std::list<  jewel * > moving;
@@ -144,7 +144,8 @@ namespace bejeweled {
 					invariant();
 				}
 
-				/// Swaps two adjacent jewels
+				/// Swaps two adjacent jewels,
+				/// causes the two jewels to change places in logical map and acelerate towards the each others' location.
 				void swap(int f_col, int f_lin, int s_col, int s_lin)
 				{
 					std::string fn{ std::string("\n") + std::string(__PRETTY_FUNCTION__) + ": " };
@@ -162,7 +163,9 @@ namespace bejeweled {
 					auto x = map[f_col][f_lin]->map_x();
 					auto y = map[f_col][f_lin]->map_y();
 					move_jewel(map[f_col][f_lin], map[s_col][s_lin]->map_x(), map[s_col][s_lin]->map_y());
-					move_jewel(map[s_col][s_lin], x, y)
+					move_jewel(map[s_col][s_lin], x, y);
+
+					
 
 
 					std::cout << fn << "swapped <" << f_col << ", " << f_lin << "> to <" << s_col << ", " << s_lin << ">." << std::endl;
@@ -309,8 +312,8 @@ namespace bejeweled {
 
 					{
 						// iterate through the store, ticking and rendering every jewel
-						for (int lin = 0; lin < lines; lin++)
-							for (int col = 0; col < columns; columns++)
+						for (int lin = 0; lin < LINES; lin++)
+							for (int col = 0; col < COLUMNS; col++)
 								map[lin][col]->on_frame();
 					}
 
@@ -375,7 +378,7 @@ namespace bejeweled {
 								*map[col][lin] = *map[col][lin - 1];
 								move(map[col][lin], col, lin - 1);
 							}
-							columns_with_free_slots[col]++;
+							columns_with_free_slots[col] = columns_with_free_slots[col] ++;
 
 							jewel_it = collapsing.remove(jewel_it);
 						}
@@ -406,8 +409,8 @@ namespace bejeweled {
 
 					}
 
-					auto jewel_column = (b.x - screen.x) / jewel_width;
-					auto jewel_line = (b.y - screen.y) / jewel_height;
+					auto jewel_column = (b.x - screen.x) / JEWEL_WIDTH;
+					auto jewel_line = (b.y - screen.y) / JEWEL_HEIGTH;
 					std::cout << fn << "clicked on <" << jewel_column << ", " << jewel_line << ">\n";
 
 					if (selected[0] == nullptr)

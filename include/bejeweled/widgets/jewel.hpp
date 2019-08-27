@@ -13,7 +13,9 @@ namespace interface1 {
 
 enum class jewel_type
 {
-  YELLOW=0, GRAY, BLUE, RED, PURPLE
+  YELLOW=0, GRAY, BLUE, RED, PURPLE,
+
+  JEWEL_TYPE_COUNT
 };
 
 
