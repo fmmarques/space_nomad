@@ -4,6 +4,7 @@
 #include <cassert>
 #include <set>
 #include <queue>
+#include <algorithm>
 
 #include <yage/graphics/spritesheet.hpp>
 #include <bejeweled/widgets/jewel.hpp>
@@ -18,7 +19,7 @@ class random_generator
 private:
 public:
   random_generator();
-  void operator()(std::vector< std::shared_ptr< jewel > >&, jewel *[8][8], uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
+  void operator()(std::list< std::shared_ptr< jewel > >&, jewel *[8][8], uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
 };
 
 template < typename map_generator_t >
@@ -31,14 +32,43 @@ private:
   SDL_Rect screen;
   uint32_t jewel_width, jewel_height;
   uint32_t lines, columns;
-  std::vector< std::shared_ptr< jewel > > store;
+  std::list< std::shared_ptr< jewel > > store;
   
-  jewel * map[8][8];
+  std::shared_ptr< jewel > map[8][8];
  
   std::array< std::shared_ptr< jewel >, 2 > selected;  
   std::list<  std::shared_ptr< jewel > > moving;
   std::list<  std::shared_ptr< jewel > > collapsing;
 
+  void invariant()
+  {
+    bool no_jewel_in_collapsing_is_in_store = true;
+    bool no_jewel_in_moving_is_in_store = true;
+    bool every_renderable_jewel_is_within_map = true;
+
+    for( auto&& collapsing_jewel : collapsing )
+    {
+//	no_jewel_in_collapsing_is_in_store = !(std::find(std::begin(store), std::end(store), *collapsing_jewel) == std::end(store));
+	every_renderable_jewel_is_within_map &= screen.x <= collapsing_jewel->x() && screen.x+screen.w >= collapsing_jewel->x() && screen.y <= collapsing_jewel->y() && screen.y+screen.h >= collapsing_jewel->y();
+    }
+
+    for (auto&& moving_jewel: moving)
+    {
+//	no_jewel_in_moving_is_in_store = !(std::find(std::begin(store), std::end(store), *moving_jewel) == std::end(store));
+	every_renderable_jewel_is_within_map &= screen.x <= moving_jewel->x() && screen.x+screen.w >= moving_jewel->x() && screen.y <= moving_jewel->y() && screen.y+screen.h >= moving_jewel->y();
+    
+    }
+
+/*    for (auto&& jewel: store)
+    {
+	every_renderable_jewel_is_within_map &= screen.x <= jewel->x() && screen.x+screen.w >= jewel->x() && screen.y <= jewel->y() && screen.y+screen.h >= jewel->y();
+	*/
+    }
+
+    assert(no_jewel_in_collapsing_is_in_store);
+    assert(no_jewel_in_moving_is_in_store);
+    assert(every_renderable_jewel_is_within_map);
+  }
 public:
   grid(  const std::string& spritesheet, 
 	 const SDL_Rect& screen,  
@@ -70,7 +100,20 @@ public:
   assert(0 < columns);
 
   uint32_t subgroups_to_create = 5;
+  
   map_generator_t()(store, map, (uint32_t) 5, screen.x, screen.y, jewel_width, jewel_height, lines, columns); 
+  
+  auto&& groups_to_collapse = make_groups();
+  for(auto&& group : groups_to_collapse)
+  {
+    for(auto&& jewel : group)
+    {
+      collapsing.emplace_back(*jewel);
+      map[jewel->map_x()][jewel->mapy()] = nullptr;
+      //store.remove(*jewel);
+    }
+  }
+  
   std::cout << fn << "exit"; 
 }
 
@@ -189,13 +232,16 @@ public:
     std::cout << fn << "enter"; 
 
     { // iterate through the store, ticking and rendering every jewel
-      auto&& jewel_it = store.begin();
+ /*     auto&& jewel_it = store.begin();
       while (store.end() != jewel_it)
       {
         (*jewel_it)->tick();
         (*jewel_it)->on_frame();
         jewel_it++;
       }
+*/
+      iterar pelo map em invés da store;
+      comentar referências à store.
     }
 
     { // iterate through the moving collection, ticking and rendering
@@ -274,12 +320,14 @@ public:
     if (selected[0] == nullptr) 
     {
       std::cout << fn << "setting first moving piece.";
-      selected[0] = store[jewel_column + jewel_line*columns];
+      //selected[0] = store[jewel_column + jewel_line*columns];
+      selected[1] = std::find(map[jewel_column][jewel_line];
     }
     else
     {
       std::cout << fn << "setting second moving piece.";
-      selected[1] = store[jewel_column + jewel_line*columns];
+      //selected[1] = store[jewel_column + jewel_line*columns];
+      selected[1] = map[jewel_column][jewel_line];
  
       selected[0]->map_x(selected[1]->map_x()); 
       selected[0]->map_y(selected[1]->map_y());

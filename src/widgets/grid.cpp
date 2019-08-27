@@ -11,8 +11,8 @@ random_generator::random_generator()
 {}
 
 void random_generator::operator()( 
-  std::vector< std::shared_ptr< jewel > >& store,
-  jewel *map[8][8],
+  std::list< std::shared_ptr< jewel > >& store,
+  shared_ptr< jewel >map[8][8],
   uint32_t subgroups_to_create,
   uint32_t map_x_pos,
   uint32_t map_y_pos,
@@ -51,8 +51,9 @@ void random_generator::operator()(
 
       jewel current(type, "assets/gems.spritesheet.transparent.png", screen, 0, line, column, lines, columns);
       
-      store.emplace_back(new jewel(current));
-      map[column][line] = store[ column + line*columns ].get();
+    //  store.emplace_back(new jewel(current));
+    //  map[column][line] = store[ column + line*columns ].get();
+      map[column][line] = std::make_shared<jewel>(current);
     }
   }
 }
