@@ -10,371 +10,433 @@
 #include <bejeweled/widgets/jewel.hpp>
 
 namespace bejeweled {
-namespace widgets {
-namespace interface1 {
+	namespace widgets {
+		namespace interface1 {
 
-template < typename map_generator_t > class grid;
-class random_generator
-{
-private:
-public:
-  random_generator();
-  void operator()(std::list< std::shared_ptr< jewel > >&, jewel *[8][8], uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t);
-};
+			template < typename map_generator_t > class grid;
+			class random_generator
+			{
+			private:
+				random_generator();
 
-template < typename map_generator_t >
-class grid
-{
-public:
-  static const uint32_t LINES=8, COLUMNS=8, SPACES = LINES*COLUMNS;
-private:
-  yage::graphics::spritesheet< jewel_type, jewel_animation_type > sheet;
-  SDL_Rect screen;
-  uint32_t jewel_width, jewel_height;
-  uint32_t lines, columns;
-  std::list< std::shared_ptr< jewel > > store;
-  
-  std::shared_ptr< jewel > map[8][8];
- 
-  std::array< std::shared_ptr< jewel >, 2 > selected;  
-  std::list<  std::shared_ptr< jewel > > moving;
-  std::list<  std::shared_ptr< jewel > > collapsing;
+				static jewel make_jewel(int col, int lin, int map_x_pos, int map_y_pos)
+				{
+					srand(time(NULL));
 
-  void invariant()
-  {
-    bool no_jewel_in_collapsing_is_in_store = true;
-    bool no_jewel_in_moving_is_in_store = true;
-    bool every_renderable_jewel_is_within_map = true;
+					SDL_Rect screen
+					{
+						.x = static_cast<decltype(SDL_Rect::x)>(map_x_pos + col * JEWEL_WIDTH),
+						.y = static_cast<decltype(SDL_Rect::y)>(map_y_pos + lin * JEWEL_HEIGTH),
+						.w = static_cast<decltype(SDL_Rect::w)>(JEWEL_WIDTH),
+						.h = static_cast<decltype(SDL_Rect::h)>(JEWEL_HEIGTH)
+					};
 
-    for( auto&& collapsing_jewel : collapsing )
-    {
-//	no_jewel_in_collapsing_is_in_store = !(std::find(std::begin(store), std::end(store), *collapsing_jewel) == std::end(store));
-	every_renderable_jewel_is_within_map &= screen.x <= collapsing_jewel->x() && screen.x+screen.w >= collapsing_jewel->x() && screen.y <= collapsing_jewel->y() && screen.y+screen.h >= collapsing_jewel->y();
-    }
+					jewel_type type = jewel_type::YELLOW;
 
-    for (auto&& moving_jewel: moving)
-    {
-//	no_jewel_in_moving_is_in_store = !(std::find(std::begin(store), std::end(store), *moving_jewel) == std::end(store));
-	every_renderable_jewel_is_within_map &= screen.x <= moving_jewel->x() && screen.x+screen.w >= moving_jewel->x() && screen.y <= moving_jewel->y() && screen.y+screen.h >= moving_jewel->y();
-    
-    }
+					type = static_cast<jewel_type>(rand() % JEWEL_TYPES);
 
-/*    for (auto&& jewel: store)
-    {
-	every_renderable_jewel_is_within_map &= screen.x <= jewel->x() && screen.x+screen.w >= jewel->x() && screen.y <= jewel->y() && screen.y+screen.h >= jewel->y();
-	*/
-    }
+					return jewel(type, "assets/gems.spritesheet.transparent.png", screen, 0, line, column);
+				}
+			public:
 
-    assert(no_jewel_in_collapsing_is_in_store);
-    assert(no_jewel_in_moving_is_in_store);
-    assert(every_renderable_jewel_is_within_map);
-  }
-public:
-  grid(  const std::string& spritesheet, 
-	 const SDL_Rect& screen,  
-	 uint32_t jewel_width, 
-	 uint32_t jewel_height, 
-	 uint32_t lines, 
-	 uint32_t columns ):
-  sheet{spritesheet}
-, screen{screen}
-, jewel_width{ jewel_width }
-, jewel_height{ jewel_height }
-, lines{ lines }
-, columns{ columns }
-, store {}
-, map{}
-, selected{nullptr, nullptr}
-, moving{}
-, collapsing{}
-{
-  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-  std::cout << fn << "enter";
-  assert(0 <= screen.x && screen.x <= 640);
-  assert(0 <= screen.y && screen.y <= 480);
-  assert(0 < screen.h);
-  assert(0 < screen.w); 
-  assert(0 < jewel_width);
-  assert(0 < jewel_height);
-  assert(0 < lines);
-  assert(0 < columns);
+				template < unsigned int LINES, unsigned int COLUMNS, unsigned int JEWEL_WIDTH, unsigned int JEWEL_HEIGTH >
+				static void generate_map(std::shared_ptr< jewel> map[8][8], unsigned int subgroups, unsigned int x, unsigned int y)
+				{
+					const uint8_t JEWEL_TYPES = 5;
+					assert(0 <= map_x_pos && map_x_pos <= 640);
+					assert(0 <= map_y_pos && map_y_pos <= 480);
 
-  uint32_t subgroups_to_create = 5;
-  
-  map_generator_t()(store, map, (uint32_t) 5, screen.x, screen.y, jewel_width, jewel_height, lines, columns); 
-  
-  auto&& groups_to_collapse = make_groups();
-  for(auto&& group : groups_to_collapse)
-  {
-    for(auto&& jewel : group)
-    {
-      collapsing.emplace_back(*jewel);
-      map[jewel->map_x()][jewel->mapy()] = nullptr;
-      //store.remove(*jewel);
-    }
-  }
-  
-  std::cout << fn << "exit"; 
-}
+					for (auto&& lin = 0; lin < LINES; lin++)
+						for (auto&& col = 0; col < COLUMNS; col++)
+							map[col][lin] = std::make_shared<jewel>(make_jewel(col, lin, map_x_pos, map_y_pos));
+				}
 
-  virtual ~grid() {}
+				static void generate_jewels_in_columns_with_empty_spaces(std::shared_ptr< jewel >[8][8] map, std::list<  jewel * >& moving, std::array< int, 8 >& columns_with_free_slots)
+				// TODO: modify the jewel to be sure that it'll be rendered falling towards it's cell and not just appearing there.
+				//       remove the subtraction of the map_y as its a weak replacement.
+				{
+					for (auto&& col = 0; col < 8; col++) {
+						for (auto&& lin = columns_with_free_slots[col] - 1; lin >= 0; lin--) {
+							*map[col][lin] = make_jewel(col, lin, map_x_pos, map_y_pos);
+							map[col][lin]->map_y(map[col][lin]->map_y() - 1);
+							moving.insert(moving.end(), map[col][lin].get());
+						}
+					}
+				}
 
-  operator SDL_Rect&() 
-  { 
-    return screen;
-  }
+			};
 
-  void swap(int f_col, int f_lin, int s_col, int s_lin)
-  {
-    using bejeweled::widgets::jewel;
+			template < typename map_generator_t >
+			class grid
+			{
+			public:
+				static const uint32_t LINES = 8, COLUMNS = 8, SPACES = LINES * COLUMNS, JEWEL_WIDTH = 32, JEWEL_HEIGHT = 32;
+			private:
+				yage::graphics::spritesheet< jewel_type, jewel_animation_type > sheet;
+				SDL_Rect screen;
 
-    jewel e(jewel_type::YELLOW, 0, 0, 0, 0);
-    e = *map[f_col][f_lin];
-    *map[f_col][f_lin] = *map[s_col][s_lin];
-    *map[s_col][s_lin] = e;
+				/// the logical map
+				std::shared_ptr< jewel > map[8][8];
 
-    auto x = map[f_col][f_lin]->map_x();
-    auto y = map[f_col][f_lin]->map_y();
-    map[f_col][f_lin]->map_x(map[s_col][s_lin]->map_x());
-    map[f_col][f_lin]->map_y(map[s_col][s_lin]->map_y());
-    map[s_col][s_lin]->map_x(x);
-    map[s_col][s_lin]->map_y(y);
-  }
+				/// the counter of free slot per column
+				std::array< uint32_t, 8 > columns_with_free_slots;
 
+				/// the jewels in motion
+				std::list<  jewel * > moving;
 
-  /* Returns a group (3 or more jewels in a line or column) from x,y */
-  std::vector< jewel * > make_group_from(int x, int y)
-  {
-    std::array < jewel *, 8 > tmp;
-    std::vector < jewel * > result{};
+				/// the jewels collapsing
+				std::list<  jewel * > collapsing;
 
-    int pos = 0;
-    for ( int xn = x - 1; xn >= 0 && 
-	  map[xn][y]->type() == map[x][y]->type(); 
-	  xn--, pos++ )
-      tmp[pos] = map[xn][y];
+				/// the jewels selected by the user;
+				std::array< jewel *, 2 > selected;
 
-    for ( int xn = x + 1; 
-	  xn < 8 && map[xn][y]->type() == map[x][y]->type(); 
-	  xn++, pos++ )
-      tmp[pos] = map[xn][y];
+				void invariant()
+				{
+					bool no_jewel_in_collapsing_is_in_store = true;
+					bool no_jewel_in_moving_is_in_store = true;
+					bool every_renderable_jewel_is_within_map = true;
 
-    if (pos + 1 >= 3)
-      result.insert(result.begin(), tmp.begin(), tmp.begin() + pos);
+					for (auto&& collapsing_jewel : collapsing)
+					{
+						every_renderable_jewel_is_within_map &= screen.x <= collapsing_jewel->x() && screen.x + screen.w >= collapsing_jewel->x() && screen.y <= collapsing_jewel->y() && screen.y + screen.h >= collapsing_jewel->y();
+					}
 
-    pos = 0;
-    for ( int yn = y - 1; 
-	  yn >= 0 && map[x][yn]->type() == map[x][y]->type(); 
-	  yn--, pos++ )
-      tmp[pos] = (map[x][yn]);
+					for (auto&& moving_jewel : moving)
+					{
+						every_renderable_jewel_is_within_map &= screen.x <= moving_jewel->x() && screen.x + screen.w >= moving_jewel->x() && screen.y <= moving_jewel->y() && screen.y + screen.h >= moving_jewel->y();
+					}
 
-    for ( int yn = y + 1; 
-	  yn < 8 && map[x][yn]->type() == map[x][y]->type(); 
-	  yn++, pos++ )
-      tmp[pos] = (map[x][yn]);
+					assert(no_jewel_in_collapsing_is_in_store);
+					assert(no_jewel_in_moving_is_in_store);
+					assert(every_renderable_jewel_is_within_map);
+				}
+			protected:
+				/// moves a jewel
+				/// causes a jewel to gain velocity towards its destination and to be added to the moving
+				void move_jewel(jewel* j, int col, int lin)
+				{
+					assert(j != nullptr);
+					assert(j->map_x() != col || j->map_y() != lin);
+					invariant();
 
-    if (pos + 1 >= 3)
-      result.insert(result.begin(), tmp.begin(), tmp.begin() + pos);
+					j->map_x(col);
+					j->map_y(lin);
 
-    if (result.size() >= 2)
-      result.insert(result.begin(), map[x][y]);
+					j->animation(jewel_animation_type::IDLE);
 
-    return result;
-  }
+					j->vel(1);
 
-  /* returns all the groups on the map */
-  std::vector< std::vector< jewel * > > make_groups()
-  {
-    std::vector< std::vector< jewel * > > groups{};
-    std::set< jewel * > seen{};
+					moving.insert(moving.end(), j);
 
-    for (int lin = 0; lin < 8; lin++)
-    {
-      for (int col = 0; col < 8; col++)
-      {
-        std::queue< jewel * > next{};
-        std::vector< jewel* > group{}, current_group{};
+					invariant();
+				}
 
-        group.reserve(3);
-        current_group.reserve(3);
+				/// 
+				/// causes a jewel to use the collapsing animation and to be added to the collapsing 
+				void collapse_jewel(jewel* j)
+				{
+					assert(j != nullptr);
+					invariant();
 
-        if (seen.find(map[col][lin]) != seen.end())
-          continue;
+					j->animation(jewel_animation_type::COLLAPSING);
+					collapsing.insert(collapsing.end(), j);
 
-        next.emplace(map[col][lin]);
-        do 
-        {
-          auto curr = next.front();
-          next.pop();
+					invariant();
+				}
 
-          current_group = make_group_from(curr->x(), curr->y());
-          if (current_group.size() > group.size())
-            group = current_group;
-          for (auto&& jewel : current_group)
-          {
-            if (seen.find(jewel) == seen.end())
-              next.emplace(jewel);
-          }
-          seen.emplace(curr);
-         } while (!next.empty());
-         
-	if (group.size() > 0)
-          groups.emplace_back(group);
-      }
-    }
-    return groups;
-  }
- 
+				/// Swaps two adjacent jewels
+				void swap(int f_col, int f_lin, int s_col, int s_lin)
+				{
+					std::string fn{ std::string("\n") + std::string(__PRETTY_FUNCTION__) + ": " };
+					using bejeweled::widgets::jewel;
 
-  void on_frame()
-  {
-    std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-    std::cout << fn << "enter"; 
+					std::cout << fn << "enter.";
+					if (std::abs(f_col - s_col) > 1 || std::abs(f_lin - s_lin) > 1)
+						std::cout << fn << "warning: swapping <" << f_col << ", " << f_lin << "> to <" << s_col << ", " << s_lin << ">, that are more than 1 place distance.";
 
-    { // iterate through the store, ticking and rendering every jewel
- /*     auto&& jewel_it = store.begin();
-      while (store.end() != jewel_it)
-      {
-        (*jewel_it)->tick();
-        (*jewel_it)->on_frame();
-        jewel_it++;
-      }
-*/
-      iterar pelo map em invés da store;
-      comentar referências à store.
-    }
+					jewel e(jewel_type::YELLOW, 0, 0, 0, 0);
+					e = *map[f_col][f_lin];
+					*map[f_col][f_lin] = *map[s_col][s_lin];
+					*map[s_col][s_lin] = e;
 
-    { // iterate through the moving collection, ticking and rendering
-      auto&& jewel_it = moving.begin();
-      while (moving.end() != jewel_it)
-      {
-        (*jewel_it)->tick(); 
-        (*jewel_it)->on_frame();
-        if (!(*jewel_it)->has_arrived())
-        {
-          jewel_it++;
-          continue;
-        }	
-      
-        make_group_from((*jewel_it)->map_x(), (*jewel_it)->map_y());
-     
-        jewel_it = moving.erase(jewel_it);
-      }
-    }
-
-    { // now do the same to the collapsing collection ticking and rendering
-      auto&& jewel_it = collapsing.begin();
-      while (jewel_it != collapsing.end())
-      {
-        (*jewel_it)->tick(); 
-        (*jewel_it)->on_frame();
-        if (!(*jewel_it)->has_collapsed())
-        {
-          jewel_it++;
-          continue;
-        }	
-
-        int x_map, y_map;
-        x_map = (*jewel_it)->map_x();
-	y_map = (*jewel_it)->map_y();
-      
-	while (--y_map > 0)
-        {
-          map[x_map][y_map]->map_y(y_map+1);
-	  map[x_map][y_map+1] = map[x_map][y_map];
-        }
-        jewel_it = collapsing.erase(jewel_it);
-      }
-    }
-    std::cout << fn << "exit";
-  }
-
-  void on_dragged(const SDL_MouseButtonEvent& b)
-  {
-    std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-    std::cout << fn << "enter";
-    if (moving.size() >= 0 || collapsing.size() >= 0)
-    {
-      std::cout << fn << "exit";
-      return;
-    } 
-    std::cout << fn << "exit";
-  }
-
-  void on_clicked(const SDL_MouseButtonEvent& b)
-  {
-    std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-    std::cout << fn << "enter";
-    
-    if (moving.size() >= 0 || collapsing.size() >= 0)
-    {
-      std::cout << fn << "exit";
-      return;
-
-    }
-
-    auto jewel_column = (b.x - screen.x) / jewel_width;
-    auto jewel_line = (b.y - screen.y) / jewel_height ; 
-    std::cout << fn << "clicked on <" << jewel_column << ", " << jewel_line<< ">" << std::endl;
-    
-    if (selected[0] == nullptr) 
-    {
-      std::cout << fn << "setting first moving piece.";
-      //selected[0] = store[jewel_column + jewel_line*columns];
-      selected[1] = std::find(map[jewel_column][jewel_line];
-    }
-    else
-    {
-      std::cout << fn << "setting second moving piece.";
-      //selected[1] = store[jewel_column + jewel_line*columns];
-      selected[1] = map[jewel_column][jewel_line];
- 
-      selected[0]->map_x(selected[1]->map_x()); 
-      selected[0]->map_y(selected[1]->map_y());
-
-      selected[1]->map_x(selected[0]->map_x());
-      selected[1]->map_y(selected[0]->map_y());
-
-  //  tirar da store?
-  // Actualizo o mapa
-      {
-        int f_x, f_y, s_x, s_y;
-        f_x = selected[0]->map_x();
-        f_y = selected[0]->map_y();
-        s_x = selected[1]->map_x();
-        s_y = selected[1]->map_y();
-        auto exchange = map[f_x][f_y];
-	map[f_x][f_y] = map[s_x][s_y];
-	map[s_x][s_y] = exchange;
-      } 
-   //  Troco a peca,
-      {
-        auto exchange(*selected[0]);
-        *selected[0] = *selected[1];
-        *selected[1] = exchange;
-             
-        moving.insert(moving.cend(),selected[0]);
-        moving.insert(moving.cend(),selected[1]);
-      }
-
-    }
-    std::cout << fn << "exit" << std::endl;
-  }
-
-  void lose_focus()
-  {
-    std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-    std::cout << fn << "enter";
-
-    std::cout << fn << "exit";
-  	
-  }
-  };
+					auto x = map[f_col][f_lin]->map_x();
+					auto y = map[f_col][f_lin]->map_y();
+					move_jewel(map[f_col][f_lin], map[s_col][s_lin]->map_x(), map[s_col][s_lin]->map_y());
+					move_jewel(map[s_col][s_lin], x, y)
 
 
-}
-using namespace interface1;
-}
+					std::cout << fn << "swapped <" << f_col << ", " << f_lin << "> to <" << s_col << ", " << s_lin << ">." << std::endl;
+					std::cout << fn << "exit" << std::endl;
+
+				}
+
+
+				/// Returns a group from <x, y> 
+				std::vector< jewel * > make_collapsing_group_from(int x, int y)
+				{
+					std::array < jewel *, 8 > tmp;
+					std::vector < jewel * > result{};
+
+					if (map[x][y]->has_collapsed() || !map[x][y]->has_arrived())
+						return std::vector< jewel * >{};
+
+
+					int pos = 0;
+					for (int xn = x - 1;
+						xn >= 0 && !(map[xn][y]->has_collapsed()) && (map[xn][y]->has_arrived()) && map[xn][y]->type() == map[x][y]->type();
+						xn--, pos++)
+						tmp[pos] = map[xn][y];
+
+					for (int xn = x + 1;
+						xn < 8 && !(map[xn][y]->has_collapsed()) && (map[xn][y]->has_arrived()) && map[xn][y]->type() == map[x][y]->type();
+						xn++, pos++)
+						tmp[pos] = map[xn][y];
+
+					if (pos + 1 >= 3)
+						result.insert(result.begin(), tmp.begin(), tmp.begin() + pos);
+
+					pos = 0;
+					for (int yn = y - 1;
+						yn >= 0 && !(map[x][yn]->has_collapsed()) && (map[x][yn]->has_arrived()) && map[x][yn]->type() == map[x][y]->type();
+						yn--, pos++)
+						tmp[pos] = (map[x][yn]);
+
+					for (int yn = y + 1;
+						yn < 8 && !(map[x][yn]->has_collapsed()) && (map[x][yn]->has_arrived()) && map[x][yn]->type() == map[x][y]->type();
+						yn++, pos++)
+						tmp[pos] = (map[x][yn]);
+
+					if (pos + 1 >= 3)
+						result.insert(result.begin(), tmp.begin(), tmp.begin() + pos);
+
+					if (result.size() >= 2)
+						result.insert(result.begin(), map[x][y]);
+
+					std::for_each(std::begin(result), std::end(result), [](jewel * j) { j->animation(jewel_animation_type::COLLAPSING); })
+
+						return result;
+				}
+
+				/// Adds all the existing groups to collapse.
+				void collapse_existing_groups()
+				{
+					std::vector< std::vector< jewel * > > groups{};
+					std::set< jewel * > seen{};
+
+					for (int lin = 0; lin < 8; lin++)
+					{
+						for (int col = 0; col < 8; col++)
+						{
+							std::queue< jewel * > next{};
+							std::vector< jewel* > group{}, current_group{};
+
+							group.reserve(3);
+							current_group.reserve(3);
+
+							if (seen.find(map[col][lin]) != seen.end())
+								continue;
+
+							next.emplace(map[col][lin]);
+							do
+							{
+								auto curr = next.front();
+								next.pop();
+
+								current_group = make_collapsing_group_from(curr->x(), curr->y());
+								if (current_group.size() > group.size())
+									group = current_group;
+								for (auto&& jewel : current_group)
+								{
+									if (seen.find(jewel) == seen.end())
+									{
+										next.emplace(jewel);
+										//jewel->animation(jewel_animation_type::COLLAPSING);
+									}
+								}
+								seen.emplace(curr);
+							} while (!next.empty());
+
+							if (group.size() > 0)
+								groups.emplace_back(group);
+						}
+					}
+					return groups;
+				}
+
+
+			public:
+				grid(const std::string& spritesheet,
+					const SDL_Rect& screen) :
+					sheet{ spritesheet }
+					, screen{ screen }
+					, map{}
+					, columns_with_free_slots{}
+					, selected{ nullptr, nullptr }
+					, moving{}
+					, collapsing{}
+				{
+					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+					std::cout << fn << "enter";
+					assert(0 <= screen.x && screen.x <= 640);
+					assert(0 <= screen.y && screen.y <= 480);
+					assert(screen.h == JEWEL_WIDTH * 8);
+					assert(screen.w == JEWEL_HEIGHT * 8);
+
+					uint32_t subgroups_to_create = 5;
+
+					map_generator_t::generate_map< LINES, COLUMNS, JEWEL_WIDTH, JEWEL_HEIGHT >(map, (uint32_t)5, screen.x, screen.y);
+
+					collapse_existing_groups();
+
+					std::cout << fn << "exit";
+				}
+
+				virtual ~grid() {}
+
+				operator SDL_Rect&()
+				{
+					return screen;
+				}
+
+				void on_frame()
+				{
+					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+					std::cout << fn << "enter";
+
+					{
+						map_generator_t::generate_jewels_in_columns_with_empty_spaces(map, columns_with_free_slots);
+					}
+
+					{
+						// iterate through the store, ticking and rendering every jewel
+						for (int lin = 0; lin < lines; lin++)
+							for (int col = 0; col < columns; columns++)
+								map[lin][col]->on_frame();
+					}
+
+					{
+						// deal with the selected jewels, if any
+						if (selected[0] && selected[1])
+						{
+							if ( std::find(moving.begin(), moving.end(), selected[0]) == moving.end() &&
+								 std::find(moving.begin(), moving.end(), selected[1]) == moving.end() )
+							{
+								swap(selected[0]->map_x(), selected[0]->map_y(), selected[1]->map_x(), selected[1]->map_y());
+							}
+						}
+					}
+
+					{
+						// iterate through the moving collection, removing those who reached their destination
+						auto&& jewel_it = moving.begin();
+						while (moving.end() != jewel_it)
+						{
+							if (!(*jewel_it)->has_arrived())
+							{
+								jewel_it++;
+								continue;
+							}
+
+							auto&& group = make_collapsing_group_from((*jewel_it)->map_x(), (*jewel_it)->map_y());
+							std::for_each(std::begin(group), std::end(group), collapse_jewel);
+
+							int jewel_selected_index = -1, pair_selected_index = -1;
+							if (!(selected[0] && selected[1]))
+								jewel_it = moving.erase(jewel_it);
+
+							selected_index = (*jewel_it == selected[0]) ? 0 : 1;
+							pair_selected_index = (*jewel_it == selected[0]) ? 1 : 0;
+
+							auto&& pair_group = make_collapsing_group_from(selected[pair_selected_index]->map_x(), selected[pair_selected_index]->map_y());
+							std::for_each(std::begin(group), std::end(group), collapse_jewel);
+
+							if (group.size() == 0 && pair_group.size() == 0)
+							{
+								swap(selected[pair_selected_index], selected[selected_index]);
+								selected[0] = selected[1] = nullptr;
+							}
+							jewel_it = moving.erase(jewel_it);
+						}
+					}
+
+					{
+						// iterate through the collapsing collection, removing already collapsed
+						auto&& jewel_it = collapsing.begin();
+						while (jewel_it != collapsing.end())
+						{
+							if (!(*jewel_it)->has_collapsed())
+							{
+								jewel_it++;
+								continue;
+							}
+
+							for (int lin = (*jewel)->map_y(), col = (*jewel)->map_x(); lin > 0; lin--)
+							{
+								*map[col][lin] = *map[col][lin - 1];
+								move(map[col][lin], col, lin - 1);
+							}
+							columns_with_free_slots[col]++;
+
+							jewel_it = collapsing.remove(jewel_it);
+						}
+					}
+				}
+
+				void on_dragged(const SDL_MouseButtonEvent& b)
+				{
+					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+					std::cout << fn << "enter";
+					if (moving.size() >= 0 || collapsing.size() >= 0)
+					{
+						std::cout << fn << "exit";
+						return;
+					}
+					std::cout << fn << "exit";
+				}
+
+				void on_clicked(const SDL_MouseButtonEvent& b)
+				{
+					std::string fn{ std::string("\n") + std::string(__PRETTY_FUNCTION__) + ": " };
+					std::cout << fn << "enter";
+
+					if (moving.size() >= 0 || collapsing.size() >= 0)
+					{
+						std::cout << fn << "exit";
+						return;
+
+					}
+
+					auto jewel_column = (b.x - screen.x) / jewel_width;
+					auto jewel_line = (b.y - screen.y) / jewel_height;
+					std::cout << fn << "clicked on <" << jewel_column << ", " << jewel_line << ">\n";
+
+					if (selected[0] == nullptr)
+					{
+						std::cout << fn << "setting first moving piece.";
+						selected[1] = std::find(map[jewel_column][jewel_line];
+					}
+					else
+					{
+						std::cout << fn << "setting second moving piece.";
+						selected[1] = map[jewel_column][jewel_line];
+					}
+					std::cout << fn << "exit" << std::endl;
+				}
+
+				void lose_focus()
+				{
+					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+					std::cout << fn << "enter";
+
+					std::cout << fn << "exit";
+
+				}
+			};
+
+
+		}
+		using namespace interface1;
+	}
 }
 
 #endif

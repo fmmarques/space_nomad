@@ -41,8 +41,8 @@ void jewel::invariant()
 {
   assert(screen.x >= 0 && screen.x <= 640);
   assert(screen.y >= 0 && screen.y <= 480);
-  assert(screen.w > 0);
-  assert(screen.h > 0);
+  assert(animation != jewel_animation_type::COLLAPSING && screen.w > 0);
+  assert(animation != jewel_animation_type::COLLAPSING && screen.h > 0);
 }	
 
 jewel::jewel(
@@ -135,7 +135,64 @@ void jewel::on_frame()
   invariant();
 }
 
+void jewel::tick()
+{
+	std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+	
+	if (animation == jewel_animation_type::COLLAPSING)
+	{
+		screen.w = ((screen.w > 0) ? screen.w - 1; screen.w);
+		screen.h = ((screen.h > 0) ? screen.h - 1; screen.h);
+	}
+
+	sheet[_type][animation].tick();
+
+	if (col*screen.w == screen.x && lin*screen.h == screen.y)
+		return;
+
+	if (col*screen.w < screen.x)
+		screen.x = ((screen.x - velocity) < col*screen.w ?
+			col * screen.w :
+			screen.x - velocity);
+	else if (col*screen.w > screen.x)
+		screen.x = ((screen.x + velocity) > col*screen.w ?
+			col * screen.w :
+			screen.x + velocity);
+	else if (lin*screen.h < screen.y)
+		screen.y = ((screen.y + velocity) > col*screen.h ?
+			col * screen.h :
+			screen.x + velocity);
+	else if (col*screen.h > screen.y)
+		screen.y = ((screen.y + velocity) > col*screen.h ?
+			col * screen.h :
+			screen.x + velocity);
+	
+	if (has_arrived())
+		velocity = 0;
+
+	invariant();
 }
+
+
+bool jewel::has_arrived() const
+{
+	bool r;
+	invariant();
+	r = screen.x == grid_x + col * screen.w && screen.y == grid_y + lin * screen.h;
+	invariant();
+	return r;
 }
+
+bool jewel::has_collapsed const()
+{
+	bool r;
+	invariant();
+	r = (_animation == jewel_animation_type::COLLAPSING && screen.w == 0 && screen.h == 0);
+	invariant();
 }
+
+
+} // interface1
+} // widgets
+} // bejeweled
 	

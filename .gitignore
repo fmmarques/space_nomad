@@ -7,3 +7,5 @@ output
 .gdbinit
 build.sh
 lib
+/.vs
+/CMakeSettings.json

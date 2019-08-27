@@ -30,10 +30,9 @@ private:
 private:
   
   jewel_type _type;
-  jewel_animation_type animation;
+  jewel_animation_type _animation;
   yage::graphics::spritesheet<jewel_type, jewel_animation_type> sheet;
   SDL_Rect screen;
-  int grid_x, grid_y;
   int col, lin;
   int velocity;
 
@@ -55,11 +54,21 @@ public:
   inline jewel_type type() const { return _type; }
   inline void type(const jewel_type& v) { _type = v; }
 
+  inline jewel_animation_type animation() const { return _animation; }
+  inline void animation(jewel_animation_type v) { _animation = v; }
+
   inline int  x() const { return screen.x; }
   inline void x(int _x) { screen.x = _x;   }
   
   inline int  y() const { return screen.y; }
   inline void y(int _y) { screen.y = _y;   }
+
+  inline int w() const { return screen.w;  }
+  inline void w(int _w) { screen.w = _w; }
+
+  inline int h() const { return screen.h; }
+  inline void h(int _h) { screen.h = _h; }
+
 
   inline int  map_x() const { return col; }
   inline void map_x(int _x) { col = _x;   }
@@ -73,42 +82,11 @@ public:
   inline void vel(int v) { velocity = v; }
 
 
-  inline void tick() 
-  {
-    std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-    sheet[_type][animation].tick();
-    
-    if (col*screen.w == screen.x && lin*screen.h == screen.y)
-      return;
-   
-    if (col*screen.w < screen.x)
-      screen.x = ((screen.x - velocity) < col*screen.w ? 
-		     col * screen.w: 
-		     screen.x - velocity);
-    else if (col*screen.w > screen.x)
-      screen.x = ((screen.x + velocity) > col*screen.w ? 
-		      col * screen.w: 
-		      screen.x + velocity);
-    else if (lin*screen.h < screen.y)
-      screen.y = ((screen.y + velocity) > col*screen.h ? 
-		      col * screen.h : 
-		      screen.x + velocity);
-    else if (col*screen.h > screen.y)
-      screen.y = ((screen.y + velocity) > col*screen.h ? 
-		      col * screen.h : 
-		      screen.x + velocity);
-  }
+  void tick();
+  
 
-  inline bool has_arrived()
-  {
-    return screen.x == grid_x + col*screen.w && 
-	   screen.y == grid_y + lin*screen.h;
-  }
-
-  inline bool has_collapsed()
-  {
-    return (animation == jewel_animation_type::COLLAPSING && screen.w == 0);
-  }
+  bool has_arrived() const;
+  bool has_collapsed() const;
 
   void on_frame(); 
 };
