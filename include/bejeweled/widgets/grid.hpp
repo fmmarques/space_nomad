@@ -15,7 +15,7 @@ namespace bejeweled {
 
 			template < typename map_generator_t > class grid;
 			
-      template < unsigned int LINES, unsigned int COLUMNS, unsigned int JEWEL_WIDTH, unsigned int JEWEL_HEIGTH >
+			template < unsigned int LINES, unsigned int COLUMNS, unsigned int JEWEL_WIDTH, unsigned int JEWEL_HEIGTH >
 			class random_generator
 			{
 			private:
@@ -79,13 +79,13 @@ namespace bejeweled {
             auto&& lin = column.front() - 1;
             column.pop();
           
-            for ( ; lin >= 0; lin-- ) 
+            for ( ; lin > 0; lin-- ) 
             {
               std::cout << "moving the piece at <" << col << ", " << lin <<"> one below. ";
-              *map[col][lin+1] = *map[col][lin];
+              *map[col][lin] = *map[col][lin-1];
             }
           
-            assert(lin == -1);
+            assert(lin == 0);
           }
 
           column = columns_with_free_slots[col];
@@ -104,8 +104,8 @@ namespace bejeweled {
           //assert(columns_with_free_slots[col].size() == 0);
           
         }
+        std::cout << "exit." << std::endl;
       }
-
     };
 
     template < typename map_generator_t >
@@ -357,7 +357,6 @@ namespace bejeweled {
 				void on_frame()
 				{
 					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-
 					{
 						map_generator_t::generate_jewels_in_columns_with_empty_spaces(map, moving, columns_with_free_slots, screen.x, screen.y);
 					}
@@ -366,10 +365,10 @@ namespace bejeweled {
 						// iterate through the store, ticking and rendering every jewel
 						for (int lin = 0; lin < LINES; lin++)
 							for (int col = 0; col < COLUMNS; col++) 
-              {
-                map[lin][col]->tick();
+							{
+								map[lin][col]->tick();
 								map[lin][col]->on_frame();
-              }
+							}
 					}
 
 					{
@@ -400,20 +399,20 @@ namespace bejeweled {
 
 							int selected_index = -1, pair_selected_index = -1;
 							if (selected[0] && selected[1]) 
-              {
-	              selected_index = (*jewel_it == selected[0]) ? 0 : 1;
-							  pair_selected_index = (*jewel_it == selected[0]) ? 1 : 0;
+							{
+								selected_index = (*jewel_it == selected[0]) ? 0 : 1;
+							    pair_selected_index = (*jewel_it == selected[0]) ? 1 : 0;
 
-							  auto&& pair_group = make_collapsing_group_from(selected[pair_selected_index]->map_x(), selected[pair_selected_index]->map_y());
-							  std::for_each(std::begin(group), std::end(group), [&](jewel *it){ this->collapse_jewel(it); });
+							    auto&& pair_group = make_collapsing_group_from(selected[pair_selected_index]->map_x(), selected[pair_selected_index]->map_y());
+							    std::for_each(std::begin(group), std::end(group), [&](jewel *it){ this->collapse_jewel(it); });
 
-							  if (group.size() == 0 && pair_group.size() == 0)
-							  {
-								  swap(selected[pair_selected_index], selected[selected_index]);
-								  selected[0] = selected[1] = nullptr;
-							  }
+								if (group.size() == 0 && pair_group.size() == 0)
+								{
+									swap(selected[pair_selected_index], selected[selected_index]);
+									selected[0] = selected[1] = nullptr;
+								}
 
-              }
+							}
 							jewel_it = moving.erase(jewel_it);
 						}
 					}
@@ -428,15 +427,10 @@ namespace bejeweled {
 								jewel_it++;
 								continue;
 							}
-               
-              auto col = (*jewel_it)->map_x();
-							for (int lin = (*jewel_it)->map_y(); lin > 0; lin--)
-							{
-								map[col][lin] = map[col][lin - 1];
-								move_jewel(map[col][lin].get(), col, lin);
-							}
-							columns_with_free_slots[col].push( (*jewel_it)->map_y() );
 
+              auto col = (*jewel_it)->map_y(); 
+              auto lin = (*jewel_it)->map_x();
+    					columns_with_free_slots[col].push( lin );
 							jewel_it = collapsing.erase(jewel_it);
 						}
 					}
