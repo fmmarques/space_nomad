@@ -23,6 +23,8 @@ namespace bejeweled {
 
 				static jewel make_jewel(int col, int lin, int map_x_pos, int map_y_pos)
 				{
+          std::string fn { std::string(__PRETTY_FUNCTION__) + ": " };
+          std::cout << fn << "enter ";
 
 					SDL_Rect screen
 					{
@@ -35,96 +37,115 @@ namespace bejeweled {
 					jewel_type type = jewel_type::YELLOW;
 
           auto itype = rand() % static_cast< unsigned int >(jewel_type::JEWEL_TYPE_COUNT);
-          std::cout << "type("<< itype << ") ";
           type = static_cast<jewel_type>(itype);
+          std::cout << "created a jewel at <" << screen.x << ", " << screen.y << " at <" << col << ", " << lin << "> " << std::endl;
 
-					return jewel(type, "assets/gems.spritesheet.transparent.png", screen, 0, col, lin, map_x_pos, map_y_pos);
-				}
-			public:
+        return jewel(type, "assets/gems.spritesheet.transparent.png", screen, 0, col, lin, map_x_pos, map_y_pos);
 
-				static void generate_map(std::shared_ptr< jewel > map[LINES][COLUMNS], unsigned int subgroups, unsigned int x, unsigned int y)
-				{
-          srand(time(nullptr));
-					assert(0 <= x && x + JEWEL_WIDTH * COLUMNS <= 640);
-					assert(0 <= y && y + JEWEL_HEIGTH * LINES  <= 480);
+      }
+    public:
 
-					for (auto&& lin = 0; lin < LINES; lin++)
-						for (auto&& col = 0; col < COLUMNS; col++)
-							map[col][lin] = std::make_shared<jewel>(make_jewel(col, lin, x, y));
-				}
+      static void generate_map(std::shared_ptr< jewel > map[LINES][COLUMNS], unsigned int subgroups, unsigned int x, unsigned int y)
+      {
+        srand(time(nullptr));
+        assert(0 <= x && x + JEWEL_WIDTH * COLUMNS <= 640);
+        assert(0 <= y && y + JEWEL_HEIGTH * LINES  <= 480);
 
-        static void generate_jewels_in_columns_with_empty_spaces(
-            std::shared_ptr< jewel > map[8][8], 
-            std::list<  jewel * >& moving, 
-            std::array< std::queue < int >, 8 >& columns_with_free_slots)
-				// TODO: modify the jewel to be sure that it'll be rendered falling towards it's cell and not just appearing there.
-				//       remove the subtraction of the map_y as its a weak replacement.
-				{
-					for (auto&& col = 0; col < 8; col++) 
+        for (auto&& lin = 0; lin < LINES; lin++)
+          for (auto&& col = 0; col < COLUMNS; col++)
+            map[col][lin] = std::make_shared<jewel>(make_jewel(col, lin, x, y));
+      }
+
+      static void generate_jewels_in_columns_with_empty_spaces(
+          std::shared_ptr< jewel > map[8][8], 
+          std::list<  jewel * >& moving, 
+          std::array< std::queue < int >, 8 >& columns_with_free_slots,
+          int map_x_coor,
+          int map_y_coor)
+      // TODO: modify the jewel to be sure that it'll be rendered falling towards it's cell and not just appearing there.
+      //       remove the subtraction of the map_y as its a weak replacement.
+      {
+        std::string fn ( std::string( __PRETTY_FUNCTION__) + std::string(": "));
+        std::cout << fn << "enter. ";
+        for (auto&& col = 0; col < 8; col++) 
+        {
+          if (columns_with_free_slots[col].size() == 0)
+            continue;
+          std::cout << "column " << col << " is marked with " << columns_with_free_slots[col].size() << " empty spaces. ";
+          
+          auto column = columns_with_free_slots[col];
+          while (column.size() > 0)
           {
-            
-            if (columns_with_free_slots[col].size() == 0)
-              continue;
-            auto column = columns_with_free_slots[col];
             auto&& lin = column.front() - 1;
             column.pop();
-						for ( ; lin >= 0; lin-- ) 
-							*map[col][lin+1] = *map[col][lin]; 
-            
-            assert(lin == -1);
-            lin = columns_with_free_slots[col].size();
-            for ( --lin ; lin >= 0; lin --)
+          
+            for ( ; lin >= 0; lin-- ) 
             {
-              *map[col][lin] = make_jewel(col, lin, col*JEWEL_WIDTH, (lin-1)*JEWEL_HEIGTH);
-						  map[col][lin]->map_y(map[col][lin]->map_y() - 1);
-						  moving.insert(moving.end(), map[col][lin].get());
+              std::cout << "moving the piece at <" << col << ", " << lin <<"> one below. ";
+              *map[col][lin+1] = *map[col][lin];
             }
-					
-            assert(columns_with_free_slots[col].size() == 0);
-						
-					}
-				}
+          
+            assert(lin == -1);
+          }
 
-			};
+          column = columns_with_free_slots[col];
+          while (column.size() > 0)
+          {
+            auto&& lin = column.front() - 1;
+            column.pop();
 
-			template < typename map_generator_t >
-			class grid
-			{
-			public:
-				static const uint32_t LINES = 8, COLUMNS = 8, SPACES = LINES * COLUMNS, JEWEL_WIDTH = 32, JEWEL_HEIGHT = 32;
-			private:
-				yage::graphics::spritesheet< jewel_type, jewel_animation_type > sheet;
-				SDL_Rect screen;
+            for ( ; lin >= 0; lin --)
+            {
+              std::cout << "filling <" << col << ", " << lin << "> with a new piece. ";
+              *map[col][lin] = make_jewel(col, lin, map_x_coor, map_y_coor);
+              //moving.insert(moving.end(), map[col][lin].get());
+            }
+          }       
+          //assert(columns_with_free_slots[col].size() == 0);
+          
+        }
+      }
 
-				/// the logical map
-				std::shared_ptr< jewel > map[COLUMNS][LINES];
+    };
 
-				/// the counter of free slot per column
-				std::array< std::queue< int >, COLUMNS > columns_with_free_slots;
+    template < typename map_generator_t >
+    class grid
+    {
+    public:
+      static const uint32_t LINES = 8, COLUMNS = 8, SPACES = LINES * COLUMNS, JEWEL_WIDTH = 32, JEWEL_HEIGHT = 32;
+    private:
+      yage::graphics::spritesheet< jewel_type, jewel_animation_type > sheet;
+      SDL_Rect screen;
 
-				/// the jewels in motion
-				std::list<  jewel * > moving;
+      /// the logical map
+      std::shared_ptr< jewel > map[COLUMNS][LINES];
 
-				/// the jewels collapsing
-				std::list<  jewel * > collapsing;
+      /// the counter of free slot per column
+      std::array< std::queue< int >, COLUMNS > columns_with_free_slots;
 
-				/// the jewels selected by the user;
-				std::array< jewel *, 2 > selected;
+      /// the jewels in motion
+      std::list<  jewel * > moving;
 
-				void invariant()
-				{
-					bool no_jewel_in_collapsing_is_in_store = true;
-					bool no_jewel_in_moving_is_in_store = true;
-					bool every_renderable_jewel_is_within_map = true;
+      /// the jewels collapsing
+      std::list<  jewel * > collapsing;
 
-					for (auto&& collapsing_jewel : collapsing)
-					{
-						every_renderable_jewel_is_within_map &= screen.x <= collapsing_jewel->x() && screen.x + screen.w >= collapsing_jewel->x() && screen.y <= collapsing_jewel->y() && screen.y + screen.h >= collapsing_jewel->y();
-					}
+      /// the jewels selected by the user;
+      std::array< jewel *, 2 > selected;
 
-					for (auto&& moving_jewel : moving)
-					{
-						every_renderable_jewel_is_within_map &= screen.x <= moving_jewel->x() && screen.x + screen.w >= moving_jewel->x() && screen.y <= moving_jewel->y() && screen.y + screen.h >= moving_jewel->y();
+      void invariant()
+      {
+        bool no_jewel_in_collapsing_is_in_store = true;
+        bool no_jewel_in_moving_is_in_store = true;
+        bool every_renderable_jewel_is_within_map = true;
+
+        for (auto&& collapsing_jewel : collapsing)
+        {
+          every_renderable_jewel_is_within_map &= screen.x <= collapsing_jewel->x() && screen.x + screen.w >= collapsing_jewel->x() && screen.y <= collapsing_jewel->y() && screen.y + screen.h >= collapsing_jewel->y();
+        }
+
+        for (auto&& moving_jewel : moving)
+        {
+          every_renderable_jewel_is_within_map &= screen.x <= moving_jewel->x() && screen.x + screen.w >= moving_jewel->x() && screen.y <= moving_jewel->y() && screen.y + screen.h >= moving_jewel->y();
 					}
 
 					assert(no_jewel_in_collapsing_is_in_store);
@@ -336,10 +357,9 @@ namespace bejeweled {
 				void on_frame()
 				{
 					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-					std::cout << fn << "enter";
 
 					{
-						map_generator_t::generate_jewels_in_columns_with_empty_spaces(map, moving, columns_with_free_slots);
+						map_generator_t::generate_jewels_in_columns_with_empty_spaces(map, moving, columns_with_free_slots, screen.x, screen.y);
 					}
 
 					{

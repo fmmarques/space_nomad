@@ -52,7 +52,7 @@ public:
 
     std::cout << fn << "entry" << std::endl;
     constexpr auto TICKS_IN_SECOND = 1000;
-    constexpr auto FRAMES_PER_SECOND = 30;
+    constexpr auto FRAMES_PER_SECOND = 2;
     constexpr auto TICKS_PER_FRAME = TICKS_IN_SECOND/FRAMES_PER_SECOND;
 
 
