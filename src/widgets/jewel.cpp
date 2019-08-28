@@ -41,8 +41,9 @@ void jewel::invariant() const
 {
   assert(screen.x >= 0 && screen.x <= 640);
   assert(screen.y >= 0 && screen.y <= 480);
-  assert(!(_animation != jewel_animation_type::COLLAPSING) || screen.w > 0);
-  assert(!(_animation != jewel_animation_type::COLLAPSING) || screen.h > 0);
+  assert(!(_animation != jewel_animation_type::COLLAPSING) || screen.w == 32);
+  assert(!(_animation != jewel_animation_type::COLLAPSING) || screen.h == 32);
+  assert(!(_animation == jewel_animation_type::IDLE) || screen.w == 32);
 }	
 
 jewel::jewel(

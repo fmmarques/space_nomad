@@ -53,18 +53,36 @@ namespace bejeweled {
 							map[col][lin] = std::make_shared<jewel>(make_jewel(col, lin, x, y));
 				}
 
-        static void generate_jewels_in_columns_with_empty_spaces(std::shared_ptr< jewel > map[8][8], std::list<  jewel * >& moving, std::array< int, 8 >& columns_with_free_slots)
+        static void generate_jewels_in_columns_with_empty_spaces(
+            std::shared_ptr< jewel > map[8][8], 
+            std::list<  jewel * >& moving, 
+            std::array< std::queue < int >, 8 >& columns_with_free_slots)
 				// TODO: modify the jewel to be sure that it'll be rendered falling towards it's cell and not just appearing there.
 				//       remove the subtraction of the map_y as its a weak replacement.
 				{
-					for (auto&& col = 0; col < 8; col++) {
-						for (auto&& lin = columns_with_free_slots[col] - 1; lin >= 0; lin--) {
-							*map[col][lin] = make_jewel(col, lin, col*JEWEL_WIDTH, lin*JEWEL_HEIGTH);
-							map[col][lin]->map_y(map[col][lin]->map_y() - 1);
-							moving.insert(moving.end(), map[col][lin].get());
-						}
+					for (auto&& col = 0; col < 8; col++) 
+          {
+            
+            if (columns_with_free_slots[col].size() == 0)
+              continue;
+            auto column = columns_with_free_slots[col];
+            auto&& lin = column.front() - 1;
+            column.pop();
+						for ( ; lin >= 0; lin-- ) 
+							*map[col][lin+1] = *map[col][lin]; 
+            
+            assert(lin == -1);
+            lin = columns_with_free_slots[col].size();
+            for ( --lin ; lin >= 0; lin --)
+            {
+              *map[col][lin] = make_jewel(col, lin, col*JEWEL_WIDTH, (lin-1)*JEWEL_HEIGTH);
+						  map[col][lin]->map_y(map[col][lin]->map_y() - 1);
+						  moving.insert(moving.end(), map[col][lin].get());
+            }
+					
+            assert(columns_with_free_slots[col].size() == 0);
+						
 					}
-					columns_with_free_slots = std::array< int, 8 >{ 0, };
 				}
 
 			};
@@ -82,7 +100,7 @@ namespace bejeweled {
 				std::shared_ptr< jewel > map[COLUMNS][LINES];
 
 				/// the counter of free slot per column
-				std::array< int, COLUMNS > columns_with_free_slots;
+				std::array< std::queue< int >, COLUMNS > columns_with_free_slots;
 
 				/// the jewels in motion
 				std::list<  jewel * > moving;
@@ -120,12 +138,12 @@ namespace bejeweled {
 				{
 					assert(j != nullptr);
 					assert(j->map_x() != col || j->map_y() != lin);
-					invariant();
+          invariant();
 
 					j->map_x(col);
 					j->map_y(lin);
 
-					j->animation(jewel_animation_type::IDLE);
+         // j->animation(jewel_animation_type::IDLE);
 
 					j->vel(1);
 
@@ -397,7 +415,7 @@ namespace bejeweled {
 								map[col][lin] = map[col][lin - 1];
 								move_jewel(map[col][lin].get(), col, lin);
 							}
-							columns_with_free_slots[col] = columns_with_free_slots[col] ++;
+							columns_with_free_slots[col].push( (*jewel_it)->map_y() );
 
 							jewel_it = collapsing.erase(jewel_it);
 						}
