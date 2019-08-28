@@ -22,7 +22,7 @@ class base_game:
 private:
   yage::input::mouse mouse;
   yage::graphics::texture background;
-  bejeweled::widgets::grid< bejeweled::widgets::random_generator > grid;
+  bejeweled::widgets::grid< bejeweled::widgets::random_generator< 8,8,32,32 > > grid;
 protected:
 
 public:

@@ -8,7 +8,7 @@ set(CMAKE_MODULE_PATH cmake)
 
 
 # Includes 
-include(dependencies.helper.cmake)
+include(dependencies.helper)
 
 # Update dependencies through git
 update_dependencies()

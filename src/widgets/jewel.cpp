@@ -37,12 +37,12 @@ namespace bejeweled {
 namespace widgets {
 namespace interface1 {
 
-void jewel::invariant()
+void jewel::invariant() const
 {
   assert(screen.x >= 0 && screen.x <= 640);
   assert(screen.y >= 0 && screen.y <= 480);
-  assert(animation != jewel_animation_type::COLLAPSING && screen.w > 0);
-  assert(animation != jewel_animation_type::COLLAPSING && screen.h > 0);
+  assert(!(_animation != jewel_animation_type::COLLAPSING) || screen.w > 0);
+  assert(!(_animation != jewel_animation_type::COLLAPSING) || screen.h > 0);
 }	
 
 jewel::jewel(
@@ -50,20 +50,20 @@ jewel::jewel(
  const std::string& spritesheet_filename,
  const SDL_Rect& screen_pos,
  int velocity,
- int map_line,
- int map_column,
+ int col,
+ int lin,
  int grid_x,
  int grid_y
 ):
   _type{type}
-, animation{jewel_animation_type::IDLE }
+, _animation{jewel_animation_type::IDLE }
 , sheet{spritesheet_filename}
 , screen{ .x=screen_pos.x, .y=screen_pos.y, .w=screen_pos.w, .h=screen_pos.h}
-, grid_x{grid_x}
-, grid_y{grid_y}
-, col{map_column}
-, lin{map_line}
+, col{col}
+, lin{lin}
 , velocity{velocity}
+, grid_x(grid_x)
+, grid_y(grid_y)
 {
   int x = 0, y = 0, w = 32, h = 32;
   y = static_cast< uint32_t >(_type)*2*h; 
@@ -78,37 +78,39 @@ jewel::jewel(
 
 jewel::jewel(jewel&& other):
   _type(std::move(other._type))
-, animation(std::move(other.animation))
+, _animation(std::move(other._animation))
 , sheet(std::move(other.sheet))
 , screen(std::move(other.screen))
-, grid_x(std::move(other.grid_x))
-, grid_y(std::move(other.grid_y))
 , col(std::move(other.col))
 , lin(std::move(other.lin))
 , velocity(std::move(other.velocity))
+, grid_x(std::move(other.grid_x))
+, grid_y(std::move(other.grid_y))
 {invariant();}
 
 jewel::jewel(const jewel& other):
   _type(other._type)
-, animation(other.animation)
+, _animation(other._animation)
 , sheet(other.sheet)
 , screen(other.screen)
-, grid_x(other.grid_x)
-, grid_y(other.grid_y)
 , col(other.col)
 , lin(other.lin)
 , velocity(other.velocity)
+, grid_x(other.grid_x)
+, grid_y(other.grid_y)
 {invariant();}
 
 jewel& jewel::operator=(jewel&& other)
 {
   _type = (std::move(other._type));
-  animation = (std::move(other.animation));
+  _animation = (std::move(other._animation));
   sheet = (std::move(other.sheet));
   screen = (std::move(other.screen));
   lin = (std::move(other.lin));
   col = (std::move(other.col));
   velocity = (std::move(other.velocity));
+  grid_x = (std::move(other.grid_x));
+  grid_y = (std::move(other.grid_y));
   invariant();
   return *this;
 }
@@ -116,12 +118,15 @@ jewel& jewel::operator=(jewel&& other)
 jewel& jewel::operator=(const jewel& other)
 {
   _type = other._type;
-  animation = other.animation;
+  _animation = other._animation;
   sheet = other.sheet;
   screen = other.screen;
   lin = other.lin;
   col = other.col;
   velocity = other.velocity;
+  grid_x = other.grid_x;
+  grid_y = other.grid_y;
+
   invariant();
   return *this;
 }
@@ -131,21 +136,21 @@ void jewel::on_frame()
   invariant(); 
   std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
   //std::cout << fn<< "rendering a " << type << " jewel, with animation " << animation << std::endl;
-  sheet[_type][animation].render(&screen);
+  sheet[_type][_animation].render(&screen);
   invariant();
 }
 
 void jewel::tick()
 {
 	std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-	
-	if (animation == jewel_animation_type::COLLAPSING)
+  invariant();	
+	if (_animation == jewel_animation_type::COLLAPSING)
 	{
-		screen.w = ((screen.w > 0) ? screen.w - 1; screen.w);
-		screen.h = ((screen.h > 0) ? screen.h - 1; screen.h);
+		screen.w = ((screen.w > 0) ? screen.w - 1: screen.w);
+		screen.h = ((screen.h > 0) ? screen.h - 1: screen.h);
 	}
 
-	sheet[_type][animation].tick();
+	sheet[_type][_animation].tick();
 
 	if (col*screen.w == screen.x && lin*screen.h == screen.y)
 		return;
@@ -183,12 +188,13 @@ bool jewel::has_arrived() const
 	return r;
 }
 
-bool jewel::has_collapsed const()
+bool jewel::has_collapsed() const
 {
 	bool r;
 	invariant();
 	r = (_animation == jewel_animation_type::COLLAPSING && screen.w == 0 && screen.h == 0);
 	invariant();
+  return r;
 }
 
 

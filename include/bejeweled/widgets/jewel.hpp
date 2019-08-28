@@ -37,15 +37,18 @@ private:
   SDL_Rect screen;
   int col, lin;
   int velocity;
-
-  void invariant();
+  int grid_x;
+  int grid_y;
+  void invariant() const;
 public:
   jewel(const jewel_type& type, 
         const std::string& spritesheet, 
-	const SDL_Rect& screen_coordinates, 
-	int velocity,
-	int map_x, int map_y,
-	int grid_x, int grid_y);
+        const SDL_Rect& screen_coordinates, 
+	      int velocity,
+	      int col, 
+        int lin,
+        int grid_x,
+        int grid_y );
   jewel(jewel&& other);
   jewel(const jewel& other);
   jewel& operator=(const jewel& other);

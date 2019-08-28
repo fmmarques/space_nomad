@@ -12,7 +12,7 @@ namespace interface1 {
 base_game::base_game():
   mouse{}
 , background{ yage::graphics::texture_manager::instance().load("assets/bejeweled.background.1.jpg") }
-, grid("assets/grid.background.png", (SDL_Rect {.x=0, .y=0, .w=32*8, .h=32*8}), 32, 32, 8, 8)
+, grid("assets/grid.background.png", (SDL_Rect){.x=0, .y=0, .w=32*8, .h=32*8})
 {
   yage::input::input_manager::instance().subscribe(this); 
 }
