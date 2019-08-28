@@ -15,7 +15,7 @@ namespace bejeweled {
 
 			template < typename map_generator_t > class grid;
 			
-      template < unsigned int LINES, unsigned int COLUMNS, unsigned int JEWEL_WIDTH, unsigned int JEWEL_HEIGTH >
+			template < unsigned int LINES, unsigned int COLUMNS, unsigned int JEWEL_WIDTH, unsigned int JEWEL_HEIGTH >
 			class random_generator
 			{
 			private:
@@ -34,9 +34,9 @@ namespace bejeweled {
 
 					jewel_type type = jewel_type::YELLOW;
 
-          auto itype = rand() % static_cast< unsigned int >(jewel_type::JEWEL_TYPE_COUNT);
-          std::cout << "type("<< itype << ") ";
-          type = static_cast<jewel_type>(itype);
+					auto itype = rand() % static_cast<unsigned int>(jewel_type::JEWEL_TYPE_COUNT);
+					std::cout << "type(" << itype << ") ";
+					type = static_cast<jewel_type>(itype);
 
 					return jewel(type, "assets/gems.spritesheet.transparent.png", screen, 0, col, lin, map_x_pos, map_y_pos);
 				}
@@ -53,34 +53,44 @@ namespace bejeweled {
 							map[col][lin] = std::make_shared<jewel>(make_jewel(col, lin, x, y));
 				}
 
-        static void generate_jewels_in_columns_with_empty_spaces(
-            std::shared_ptr< jewel > map[8][8], 
-            std::list<  jewel * >& moving, 
-            std::array< std::queue < int >, 8 >& columns_with_free_slots)
+				static void generate_jewels_in_columns_with_empty_spaces(
+					std::shared_ptr< jewel > map[8][8],
+					std::list<  jewel * >& moving,
+					std::array< std::queue < int >, 8 >& columns_with_free_slots)
 				// TODO: modify the jewel to be sure that it'll be rendered falling towards it's cell and not just appearing there.
 				//       remove the subtraction of the map_y as its a weak replacement.
 				{
+
+/*
+					auto col = (*jewel_it)->map_x();
+					for (int lin = (*jewel_it)->map_y(); lin > 0; lin--)
+					{
+						map[col][lin] = map[col][lin - 1];
+						move_jewel(map[col][lin].get(), col, lin);
+					}
+*/
 					for (auto&& col = 0; col < 8; col++) 
-          {
+					{
             
-            if (columns_with_free_slots[col].size() == 0)
-              continue;
-            auto column = columns_with_free_slots[col];
-            auto&& lin = column.front() - 1;
-            column.pop();
-						for ( ; lin >= 0; lin-- ) 
-							*map[col][lin+1] = *map[col][lin]; 
+						if (columns_with_free_slots[col].size() == 0)
+							continue;
             
-            assert(lin == -1);
-            lin = columns_with_free_slots[col].size();
-            for ( --lin ; lin >= 0; lin --)
-            {
-              *map[col][lin] = make_jewel(col, lin, col*JEWEL_WIDTH, (lin-1)*JEWEL_HEIGTH);
-						  map[col][lin]->map_y(map[col][lin]->map_y() - 1);
-						  moving.insert(moving.end(), map[col][lin].get());
-            }
+						auto column = columns_with_free_slots[col];
+						auto&& lin = column.front() - 1;
+						column.pop();
+						for (; lin >= 0; lin--)
+							*map[col][lin + 1] = *map[col][lin];
+            
+						assert(lin == -1);
+						lin = columns_with_free_slots[col].size();
+						for (--lin; lin >= 0; lin--)
+						{
+							*map[col][lin] = make_jewel(col, lin, col*JEWEL_WIDTH, (lin - 1)*JEWEL_HEIGTH);
+							map[col][lin]->map_y(map[col][lin]->map_y() - 1);
+							moving.insert(moving.end(), map[col][lin].get());
+						}
 					
-            assert(columns_with_free_slots[col].size() == 0);
+						assert(columns_with_free_slots[col].size() == 0);
 						
 					}
 				}
@@ -336,7 +346,13 @@ namespace bejeweled {
 				void on_frame()
 				{
 					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-					std::cout << fn << "enter";
+					//std::cout << fn << "enter";
+
+					{
+						{
+							
+						}
+					}
 
 					{
 						map_generator_t::generate_jewels_in_columns_with_empty_spaces(map, moving, columns_with_free_slots);
@@ -346,10 +362,10 @@ namespace bejeweled {
 						// iterate through the store, ticking and rendering every jewel
 						for (int lin = 0; lin < LINES; lin++)
 							for (int col = 0; col < COLUMNS; col++) 
-              {
-                map[lin][col]->tick();
+							{
+								map[lin][col]->tick();
 								map[lin][col]->on_frame();
-              }
+							}
 					}
 
 					{
@@ -380,20 +396,20 @@ namespace bejeweled {
 
 							int selected_index = -1, pair_selected_index = -1;
 							if (selected[0] && selected[1]) 
-              {
-	              selected_index = (*jewel_it == selected[0]) ? 0 : 1;
-							  pair_selected_index = (*jewel_it == selected[0]) ? 1 : 0;
+							{
+								selected_index = (*jewel_it == selected[0]) ? 0 : 1;
+							    pair_selected_index = (*jewel_it == selected[0]) ? 1 : 0;
 
-							  auto&& pair_group = make_collapsing_group_from(selected[pair_selected_index]->map_x(), selected[pair_selected_index]->map_y());
-							  std::for_each(std::begin(group), std::end(group), [&](jewel *it){ this->collapse_jewel(it); });
+							    auto&& pair_group = make_collapsing_group_from(selected[pair_selected_index]->map_x(), selected[pair_selected_index]->map_y());
+							    std::for_each(std::begin(group), std::end(group), [&](jewel *it){ this->collapse_jewel(it); });
 
-							  if (group.size() == 0 && pair_group.size() == 0)
-							  {
-								  swap(selected[pair_selected_index], selected[selected_index]);
-								  selected[0] = selected[1] = nullptr;
-							  }
+								if (group.size() == 0 && pair_group.size() == 0)
+								{
+									swap(selected[pair_selected_index], selected[selected_index]);
+									selected[0] = selected[1] = nullptr;
+								}
 
-              }
+							}
 							jewel_it = moving.erase(jewel_it);
 						}
 					}
@@ -408,14 +424,8 @@ namespace bejeweled {
 								jewel_it++;
 								continue;
 							}
-               
-              auto col = (*jewel_it)->map_x();
-							for (int lin = (*jewel_it)->map_y(); lin > 0; lin--)
-							{
-								map[col][lin] = map[col][lin - 1];
-								move_jewel(map[col][lin].get(), col, lin);
-							}
-							columns_with_free_slots[col].push( (*jewel_it)->map_y() );
+
+    						columns_with_free_slots[col].push( (*jewel_it)->map_x() );
 
 							jewel_it = collapsing.erase(jewel_it);
 						}
