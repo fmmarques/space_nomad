@@ -15,67 +15,68 @@ main_menu::main_menu():
   ,selected_option{option::UNDEFINED}
   ,background{ yage::graphics::texture_manager::instance().load("assets/gems.spritesheet.png") } //main_menu.background.1.jpg") }
 {
-  yage::input::input_manager::instance().subscribe(this); 
 }
 
 main_menu::~main_menu ()
 {
-  yage::input::input_manager::instance().unsubscribe(this); 
 }
 
 void main_menu::on_initialize()
 {
-  std::cout << "main_menu::on_initialize: enter" << std::endl;
-  std::cout << "main_menu::on_initialize: exit" << std::endl;
+  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+  std::cout << fn << "registered to events." << std::endl;
+  yage::input::input_manager::instance().subscribe(this); 
 }
 
 void main_menu::on_pause()
 {
-  std::cout << "main_menu::on_pause(): enter" << std::endl;	
-  std::cout << "main_menu::on_pause(): exit" << std::endl;	
+  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+  yage::input::input_manager::instance().unsubscribe(this); 
+  std::cout << fn << "deregistered from events." << std::endl;	
 }
 
 void main_menu::on_continue()
 {
-  std::cout << "main_menu::on_continue(): enter" << std::endl;	
-  std::cout << "main_menu::on_continue(): exit" << std::endl;	
+  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+  yage::input::input_manager::instance().subscribe(this); 
+  std::cout << fn << "registered to events" << std::endl;	
 }
 
 void main_menu::on_deinitialize()
 {
-  std::cout << "main_menu::on_deinitialize(): enter" << std::endl;	
-  std::cout << "main_menu::on_deinitialize(): exit" << std::endl;	
+  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+  yage::input::input_manager::instance().unsubscribe(this); 
+  std::cout << fn << "deregisted from events." << std::endl;	
 }
 
 void main_menu::on_interrupt()
 {
-  std::cout << "main_menu::on_interrupt(): enter" << std::endl;	
-  std::cout << "main_menu::on_interrupt(): exit" << std::endl;	
 }
 
 void main_menu::on_frame()
 {
-//  std::cout << "main_menu::on_frame(): enter" << std::endl;	
-//  std::cout << "main_menu::on_frame(): exit" << std::endl;	
-  auto&& window_and_renderer = yage::graphics::graphics_manager::instance().get_window();
+  auto&& r = yage::graphics::graphics_manager::instance().get_window();
 
-  SDL_RenderCopy(window_and_renderer, background, NULL, window_and_renderer);
+  SDL_RenderCopy(r, background, NULL, r);
 }
 
 void main_menu::on_keycode_pressed(const SDL_Keysym& keysym) 
 {
-  std::cout << "main_menu::on_keycode_pressed: " << keysym.sym << std::endl;
+  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+  std::cout << fn << "key code: " << keysym.sym << std::endl;
 }
 
 void main_menu::on_keycode_released(const SDL_Keysym& keysym) 
 {
-  std::cout << "main_menu::on_keycode_released: " << keysym.sym << std::endl;
+  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+  std::cout << fn << "key code: " << keysym.sym << std::endl;
 
 }
 
 void main_menu::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
-  std::cout << "main_menu::on_mouse_button_down: button: " << std::to_string(button.button) << "; state: " << std::to_string(button.state) << "; clicks: " << std::to_string(button.clicks) << "; <x,y>=<" << button.x << "," <<button.y << std::endl;
+  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+  std::cout << fn << "button: " << std::to_string(button.button) << "; state: " << std::to_string(button.state) << "; clicks: " << std::to_string(button.clicks) << "; <x,y>=<" << button.x << "," <<button.y << ">" << std::endl;
 }
 
 void main_menu::on_mouse_button_up(const SDL_MouseButtonEvent& button)

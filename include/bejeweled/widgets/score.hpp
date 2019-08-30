@@ -1,16 +1,20 @@
 #if !defined(BEJEWELED_WIDGETS_SCORE_HPP)
 #  define BEJEWELED_WIDGETS_SCORE_HPP
 
+#include <yage/graphics/label.hpp>
 #include <yage/graphics/font.hpp>
 
 namespace bejeweled {
 namespace widgets {
 namespace interface1 {
 
-class score 
+class score:
+  public yage::widgets::label
 {
+private:
+  yage
 public:
-	score(font);
+	score(font f);
 };
 
 

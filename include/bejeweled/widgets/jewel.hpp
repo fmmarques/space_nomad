@@ -34,21 +34,15 @@ private:
   jewel_type _type;
   jewel_animation_type _animation;
   yage::graphics::spritesheet<jewel_type, jewel_animation_type> sheet;
-  SDL_Rect screen;
-  int col, lin;
-  int velocity;
-  int grid_x;
-  int grid_y;
+  SDL_Rect _current;
+  SDL_Rect _destination;
+  int _velocity;
   void invariant() const;
 public:
   jewel(const jewel_type& type, 
         const std::string& spritesheet, 
-        const SDL_Rect& screen_coordinates, 
-	      int velocity,
-	      int col, 
-        int lin,
-        int grid_x,
-        int grid_y );
+        const SDL_Rect& coordinates, 
+	      int velocity);
   jewel(jewel&& other);
   jewel(const jewel& other);
   jewel& operator=(const jewel& other);
@@ -56,41 +50,39 @@ public:
 
   virtual ~jewel() {}
 
-  inline jewel_type type() const { return _type; }
-  inline void type(const jewel_type& v) { _type = v; }
+  jewel_type type() const;
+  void type(const jewel_type& v);
 
-  inline jewel_animation_type animation() const { return _animation; }
-  inline void animation(jewel_animation_type v) { _animation = v; }
+  jewel_animation_type animation() const;
+  void animation(jewel_animation_type v);
 
-  inline int  x() const { return screen.x; }
-  inline void x(int _x) { screen.x = _x;   }
+  int  x() const; 
+  void x(int _x); 
   
-  inline int  y() const { return screen.y; }
-  inline void y(int _y) { screen.y = _y;   }
+  int  y() const; 
+  void y(int _y); 
 
-  inline int w() const { return screen.w;  }
-  inline void w(int _w) { screen.w = _w; }
+  int w() const;
+  void w(int _w);
 
-  inline int h() const { return screen.h; }
-  inline void h(int _h) { screen.h = _h; }
+  int h() const;
+  void h(int _h);
 
 
-  inline int  map_x() const { return col; }
-  inline void map_x(int _x) { col = _x;   }
+  int vel() const;
+  void vel(int v);
+
+  int dx() const;
+  void dx(int x);
+
+  int dy() const;
+  void dy(int y); 
   
-  inline int  map_y() const { return lin; }
-  inline void map_y(int _y) { lin = _y;   }
-
-
-
-  inline int vel() const { return velocity; }
-  inline void vel(int v) { velocity = v; }
-
-
   void tick();
   
-
+  bool is_moving() const;
   bool has_arrived() const;
+  bool is_collapsing() const;
   bool has_collapsed() const;
 
   void on_frame(); 

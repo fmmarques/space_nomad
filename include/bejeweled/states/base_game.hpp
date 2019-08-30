@@ -14,13 +14,16 @@ namespace bejeweled {
   namespace states {
     namespace interface1 {
 
+/** 
+ * A class that represents the basic bejeweled game;
+ * could be modified to allow for an subclass to provide a timed match
+ */
 class base_game: 
    public virtual yage::input::input_listener
  , public virtual yage::engine::game_state
  , public yage::engine::base_game_state< base_game >
 {
 private:
-  yage::input::mouse mouse;
   yage::graphics::texture background;
   bejeweled::widgets::grid< bejeweled::widgets::random_generator< 8,8,32,32 > > grid;
 protected:
