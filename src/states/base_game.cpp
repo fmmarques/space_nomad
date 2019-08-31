@@ -4,6 +4,7 @@
 #include <yage/input/input_manager.hpp>
 #include <yage/graphics/texture_manager.hpp>
 #include <yage/graphics/graphics_manager.hpp>
+#include <yage/graphics/font_manager.hpp>
 
 namespace bejeweled {
 namespace states {
@@ -11,6 +12,7 @@ namespace interface1 {
 
 base_game::base_game():
   background{ yage::graphics::texture_manager::instance().load("assets/bejeweled.background.1.jpg") }
+, m{ yage::graphics::font_manager::instance().load("assets/PAC-FONT.TTF", 18),"Hi!", 18 }
 , grid("assets/grid.background.png", (SDL_Rect){
     .x=640/2 - 32*4 + 102, 480/2-32*4, .w=32*8, .h=32*8})
 {
@@ -63,8 +65,9 @@ void base_game::on_frame()
 {
   auto&& r = yage::graphics::graphics_manager::instance().get_window();
 
-  
+  SDL_Rect rect { .x=0, 0, 100, 18 };
   SDL_RenderCopy(r, background, NULL, r);
+  m.render(&rect);
   grid.on_frame();
 }
 
@@ -78,7 +81,6 @@ void base_game::on_keycode_released(const SDL_Keysym& keysym)
 {
   std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
   std::cout << fn << "key sym: " << keysym.sym << std::endl;
-
 }
 
 void base_game::on_mouse_button_down(const SDL_MouseButtonEvent& button)

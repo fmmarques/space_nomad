@@ -4,6 +4,8 @@
 #include <yage/graphics/label.hpp>
 #include <yage/graphics/font.hpp>
 
+#include <bejeweled/widgets/grid_listener.hpp>
+
 namespace bejeweled {
 namespace widgets {
 namespace interface1 {

@@ -22,9 +22,27 @@ if (NOT YAGE_FOUND)
   endif()
 endif()
 
+
+find_package(SDL2_image)
+if (NOT SDL2_IMAGE_FOUND)
+  message(FATAL_ERROR "SDL2_image was not found on the system")
+endif()
+include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
+#target_link_libraries(yage ${SDL2_IMAGE_LIBRARIES})
+
+find_package(SDL2_ttf REQUIRED)
+if (NOT SDL2_TTF_FOUND)
+  message(FATAL_ERROR "SDL2_TTF was not found on the system")
+endif()
+include_directories(${SDL2_TTF_INCLUDE_DIRS})
+#target_link_libraries(yage ${SDL2_TTF_LIBRARIES})
+
+
+
 # define target bejeweled sources. 
 include_directories(AFTER SYSTEM 
 	${YAGE_INCLUDE_DIR}
+  ${SDL2_IMAGE_INCLUDE_DIRS}
 	include)
 set(BEJEWELED_SOURCES 
 	src/bejeweled.cpp

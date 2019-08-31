@@ -2,10 +2,15 @@
 #  define BEJEWELED_STATES_GAME_HPP
 
 #  include <list>
+
 #  include <yage/input/input_listener.hpp>
 #  include <yage/input/mouse.hpp>
+
 #  include <yage/engine/game_state.hpp>
+
 #  include <yage/graphics/texture.hpp>
+
+#  include <yage/widgets/label.hpp>
 
 #  include <bejeweled/widgets/grid.hpp>
 #  include <bejeweled/widgets/jewel.hpp>
@@ -25,6 +30,7 @@ class base_game:
 {
 private:
   yage::graphics::texture background;
+  yage::widgets::label m;
   bejeweled::widgets::grid< bejeweled::widgets::random_generator< 8,8,32,32 > > grid;
 protected:
 

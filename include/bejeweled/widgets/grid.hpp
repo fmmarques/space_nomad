@@ -8,16 +8,14 @@
 
 #include <yage/graphics/spritesheet.hpp>
 #include <yage/input/mouse.hpp>
+
+#include <bejeweled/widgets/grid_event_listener.hpp>
 #include <bejeweled/widgets/jewel.hpp>
 
 namespace bejeweled {
 	namespace widgets {
 		namespace interface1 {
 
-      struct score_listener_t
-      {
-        virtual void on_score_change(int new_score) = 0;
-      };
 
 			template < typename map_generator_t > class grid;
 			
@@ -177,7 +175,7 @@ namespace bejeweled {
 
       int _score;
 
-      std::list< score_listener_t * > score_listeners;
+      std::list< grid_event_listener * > event_listeners;
 
 
       void invariant()
@@ -209,7 +207,7 @@ protected:
           assert(increment > 0);
           assert(_score >= 0);
           _score += increment;
-          for (auto&& listener : score_listeners)
+          for (auto&& listener : event_listeners)
             listener->on_score_change(_score);
         }
 
@@ -466,7 +464,7 @@ public:
 					, moving{}
 					, collapsing{}
           , _score{0}
-          , score_listeners {}
+          , event_listeners {}
 				{
 					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
 					assert(0 <= screen.x && screen.x <= 640);
@@ -786,16 +784,16 @@ public:
           return _score;
         }
 
-        void subscribe(score_listener_t *listener)
+        void subscribe(grid_event_listener *listener)
         {
           assert(listener != nullptr);
-          score_listeners.insert(score_listeners.end(),listener);
+          event_listeners.insert(event_listeners.end(),listener);
         }
         
-        void unsubscribe(score_listener_t *listener)
+        void unsubscribe(grid_event_listener *listener)
         {
           assert(listener != nullptr);
-          score_listeners.remove(listener);
+          event_listeners.remove(listener);
         }
 
 			};
