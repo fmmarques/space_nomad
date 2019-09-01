@@ -65,7 +65,7 @@ namespace bejeweled {
 //              {
                 assert(!j->is_collapsing() && !j->has_collapsed());
                 j->dy(squashed_jewel * JEWEL_HEIGHT + y);
-                j->vel(1);
+                j->vel(4);
                 map[column][squashed_jewel] = j;
                 moving.insert(moving.end(), j.get());
 //              }
@@ -81,7 +81,7 @@ namespace bejeweled {
             auto&& j = std::make_shared< widgets::jewel >(make_jewel( x + column * JEWEL_WIDTH, y - inserted_jewel*JEWEL_HEIGHT ));
             auto dy = j->y()+collapsed_jewels * JEWEL_HEIGHT;
             j->dy(dy);
-            j->vel(1);
+            j->vel(4);
             map[column][collapsed_jewels - inserted_jewel] = j;
             assert(j->dy() != j->y());
 //            std::cout << fn << "created a new jewel at <" << j->x() << "," << j->y() << "> directed towards <" << j->dx() << ", " << dy <<">." << std::endl;
@@ -303,7 +303,7 @@ protected:
           
           j->dx(screen_destination.first);
           j->dy(screen_destination.second);
-          j->vel(1);
+          j->vel(4);
 					
           moving.insert(moving.end(), j);
 					
@@ -718,13 +718,44 @@ public:
 				void on_dragged(const SDL_MouseButtonEvent& b)
 				{
 					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-					std::cout << fn << "enter";
+					std::cout << fn << "enter. ";
 					if (moving.size() >= 0 || collapsing.size() >= 0)
 					{
 						std::cout << fn << "exit";
 						return;
 					}
-					std::cout << fn << "exit";
+					
+          auto&& jewel_coordinates = make_map_coordinates_from_screen(b.x, b.y);
+          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first <= 7) && 
+                (0 <= jewel_coordinates.second && jewel_coordinates.second <= 7)))
+          {
+            std::cout << fn << "received a drag event from outside the grid.\n";
+            return ;
+          }
+					auto column = jewel_coordinates.first;
+					auto line = jewel_coordinates.second;
+					std::cout << fn << "dragged <" << (int)column << ", " << (int)line << ">\n";
+
+					if (selected[0].use_count() <= 0)
+					{
+            std::cout << fn << "use_count is " << selected[0].use_count()<< "\n";
+						std::cout << fn << "setting first moving piece.\n";
+            std::weak_ptr< jewel > first{ map[column][line] };
+            selected[0].swap(first);
+					}
+					else if (map[column][line] == selected[0].lock())
+          {
+						std::cout << fn << "unsetting first moving piece.\n";
+						selected[0].reset();
+          }
+          else
+					{
+						std::cout << fn << "setting second moving piece.\n";
+						selected[1] = map[column][line];
+
+            swap(selected[0].lock().get(), selected[1].lock().get());
+					}
+          std::cout << "exit." << std::endl;;
 				}
 
 				void on_clicked(const SDL_MouseButtonEvent& b)
@@ -750,6 +781,38 @@ public:
 					auto line = jewel_coordinates.second;
 					std::cout << fn << "clicked on <" << (int)column << ", " << (int)line << ">\n";
 
+          switch(b.type)
+          {
+            case SDL_MOUSEBUTTONDOWN:
+              if (selected[0].use_count() <= 0)  
+					    {
+						    std::cout << fn << "setting first moving piece.";
+                std::weak_ptr< jewel > first{ map[column][line] };
+                selected[0].swap(first);
+					    }
+              else if (map[column][line] == selected[0].lock())
+              {
+						    std::cout << fn << "unsetting first moving piece.";
+						    selected[0].reset();
+              }
+              else  // selecting second
+              {
+						    std::cout << fn << "setting second moving piece.";
+						    selected[1] = map[column][line];
+              }
+              break;
+            case   SDL_MOUSEBUTTONUP:
+              if (selected[0].use_count() > 0 && !(map[column][line] == selected[0].lock()) )
+              {
+						    std::cout << fn << "setting second moving piece.";
+						    selected[1] = map[column][line];
+              }
+
+              break;
+          }
+          if (selected[0].lock() && selected[1].lock())  
+            swap(selected[0].lock().get(), selected[1].lock().get());
+/*
 					if (selected[0].use_count() <= 0)
 					{
             std::cout << fn << "use_count is " << selected[0].use_count()<< "\n";
@@ -769,6 +832,7 @@ public:
 
             swap(selected[0].lock().get(), selected[1].lock().get());
 					}
+*/
 					std::cout << std::endl;
 				}
 

@@ -97,8 +97,19 @@ void base_game::on_keycode_released(const SDL_Keysym& keysym)
 
 void base_game::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
+  using yage::input::mouse;
   std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
   std::cout << fn << "button: " << std::to_string(button.button) << "; state: " << std::to_string(button.state) << "; clicks: " << std::to_string(button.clicks) << "; <x,y>=<" << button.x << "," <<button.y << ">"  << std::endl;
+
+  auto&& m = mouse::instance();
+  if (m.hovers(grid)) 
+  {
+      grid.on_clicked(button);
+  }
+  else
+  {
+    grid.lose_focus();
+  }
 
 }
 
@@ -112,10 +123,7 @@ void base_game::on_mouse_button_up(const SDL_MouseButtonEvent& button)
   auto&& m = mouse::instance();
   if (m.hovers(grid)) 
   {
-    if (m.is_dragging())
-      grid.on_dragged(button);
-    else 
-      grid.on_clicked(button);
+    grid.on_clicked(button);
   }
   else
   {
@@ -125,8 +133,6 @@ void base_game::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 
 void base_game::on_mouse_movement(const SDL_MouseMotionEvent& motion)
 {
-  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-  std::cout << fn << "motion: <" << motion.x << ", " << motion.y << ">" << std::endl; 
 }
 
 
