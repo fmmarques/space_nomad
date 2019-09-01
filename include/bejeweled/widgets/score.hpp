@@ -1,22 +1,27 @@
 #if !defined(BEJEWELED_WIDGETS_SCORE_HPP)
 #  define BEJEWELED_WIDGETS_SCORE_HPP
 
-#include <yage/graphics/label.hpp>
 #include <yage/graphics/font.hpp>
+#include <yage/widgets/label.hpp>
 
-#include <bejeweled/widgets/grid_listener.hpp>
+#include <bejeweled/widgets/grid_event_listener.hpp>
 
 namespace bejeweled {
 namespace widgets {
 namespace interface1 {
 
 class score:
-  public yage::widgets::label
+  public virtual grid_event_listener
 {
 private:
-  yage
+  int _x, _y;
+  yage::widgets::label _label, _value;
+
 public:
-	score(font f);
+  score(int x, int y);
+
+  void on_score_change(int score);
+  void on_frame();
 };
 
 

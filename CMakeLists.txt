@@ -43,15 +43,16 @@ include_directories(${SDL2_TTF_INCLUDE_DIRS})
 include_directories(AFTER SYSTEM 
 	${YAGE_INCLUDE_DIR}
   ${SDL2_IMAGE_INCLUDE_DIRS}
-	include)
+  include)
 set(BEJEWELED_SOURCES 
-	src/bejeweled.cpp
+    src/bejeweled.cpp
   # states	
-  	src/states/main_menu.cpp
-	src/states/base_game.cpp
+    src/states/main_menu.cpp
+    src/states/base_game.cpp
   # widgets
-        src/widgets/jewel.cpp
-	src/widgets/grid.cpp
+    src/widgets/jewel.cpp
+    src/widgets/grid.cpp
+    src/widgets/score.cpp
 )
 add_executable(bejeweled ${BEJEWELED_SOURCES}) 
 set_property(TARGET bejeweled PROPERTY CXX_STANDARD 17)

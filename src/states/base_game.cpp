@@ -1,10 +1,13 @@
 #include <iostream>
 
-#include <bejeweled/states/base_game.hpp>
+
 #include <yage/input/input_manager.hpp>
 #include <yage/graphics/texture_manager.hpp>
 #include <yage/graphics/graphics_manager.hpp>
 #include <yage/graphics/font_manager.hpp>
+
+#include <bejeweled/states/base_game.hpp>
+#include <bejeweled/engine.hpp>
 
 namespace bejeweled {
 namespace states {
@@ -12,14 +15,16 @@ namespace interface1 {
 
 base_game::base_game():
   background{ yage::graphics::texture_manager::instance().load("assets/bejeweled.background.1.jpg") }
-, m{ yage::graphics::font_manager::instance().load("assets/PAC-FONT.TTF", 18),"Hi!", 18 }
+, score{ 640/2 - 32*4,480/2+32*2 } 
 , grid("assets/grid.background.png", (SDL_Rect){
-    .x=640/2 - 32*4 + 102, 480/2-32*4, .w=32*8, .h=32*8})
+    .x=640/2 - 32*4, 480/2-32*6, .w=32*8, .h=32*8})
 {
+  grid.subscribe((grid_event_listener*)&score);
 }
 
 base_game::~base_game ()
 {
+  grid.unsubscribe(&score);
   yage::input::input_manager::instance().unsubscribe(this); 
 }
 
@@ -67,7 +72,7 @@ void base_game::on_frame()
 
   SDL_Rect rect { .x=0, 0, 100, 18 };
   SDL_RenderCopy(r, background, NULL, r);
-  m.render(&rect);
+  score.on_frame();
   grid.on_frame();
 }
 
@@ -80,7 +85,14 @@ void base_game::on_keycode_pressed(const SDL_Keysym& keysym)
 void base_game::on_keycode_released(const SDL_Keysym& keysym) 
 {
   std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-  std::cout << fn << "key sym: " << keysym.sym << std::endl;
+  switch(keysym.sym)
+  {
+    case SDLK_ESCAPE:
+    case SDLK_BACKSPACE:
+      bejeweled::engine::instance().pop();
+    default:
+      std::cout << fn << "key sym: " << keysym.sym << std::endl;
+  }
 }
 
 void base_game::on_mouse_button_down(const SDL_MouseButtonEvent& button)

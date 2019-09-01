@@ -349,6 +349,33 @@ src/widgets/jewel.cpp.s:
 	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/jewel.cpp.s
 .PHONY : src/widgets/jewel.cpp.s
 
+src/widgets/score.o: src/widgets/score.cpp.o
+
+.PHONY : src/widgets/score.o
+
+# target to build an object file
+src/widgets/score.cpp.o:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/score.cpp.o
+.PHONY : src/widgets/score.cpp.o
+
+src/widgets/score.i: src/widgets/score.cpp.i
+
+.PHONY : src/widgets/score.i
+
+# target to preprocess a source file
+src/widgets/score.cpp.i:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/score.cpp.i
+.PHONY : src/widgets/score.cpp.i
+
+src/widgets/score.s: src/widgets/score.cpp.s
+
+.PHONY : src/widgets/score.s
+
+# target to generate assembly for a file
+src/widgets/score.cpp.s:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/score.cpp.s
+.PHONY : src/widgets/score.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -380,6 +407,9 @@ help:
 	@echo "... src/widgets/jewel.o"
 	@echo "... src/widgets/jewel.i"
 	@echo "... src/widgets/jewel.s"
+	@echo "... src/widgets/score.o"
+	@echo "... src/widgets/score.i"
+	@echo "... src/widgets/score.s"
 .PHONY : help
 
 

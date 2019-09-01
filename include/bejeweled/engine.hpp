@@ -29,7 +29,6 @@ protected:
       yage::graphics::window("bejeweled", 640, 480) 
     );
     push< bejeweled::states::main_menu >(); 
-    push< bejeweled::states::base_game >();
   }
 
 public:
@@ -48,7 +47,7 @@ public:
     std::string fn{ std::string( __PRETTY_FUNCTION__ ) + std::string(": ") };
 
     constexpr auto TICKS_IN_SECOND = 1000;
-    constexpr auto FRAMES_PER_SECOND = 15;
+    constexpr auto FRAMES_PER_SECOND = 30;
     constexpr auto TICKS_PER_FRAME = TICKS_IN_SECOND/FRAMES_PER_SECOND;
 
 

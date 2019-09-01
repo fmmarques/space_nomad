@@ -5,6 +5,7 @@
 #include <set>
 #include <queue>
 #include <algorithm>
+#include <array>
 
 #include <yage/graphics/spritesheet.hpp>
 #include <yage/input/mouse.hpp>
@@ -202,10 +203,13 @@ protected:
 // Score related methods
         // Increments the score.
         // @arg the score
-        void score(const int& increment) 
+        void score(int increment) 
         {
+          
+          std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
           assert(increment > 0);
           assert(_score >= 0);
+          std::cout << fn << "incrementing the score in " << increment << " yielding " << _score << "." << std::endl;
           _score += increment;
           for (auto&& listener : event_listeners)
             listener->on_score_change(_score);
@@ -445,12 +449,23 @@ protected:
 								groups.emplace_back(group);
 						}
 					}
-					
-          for (auto&& group : groups) {
+				
+           
+          auto increment = 0;
+          for (auto&& group : groups) 
+          {
+            auto group_points = 0, points = 0;
             for (auto&& jewel : group) {
               if (!jewel->is_collapsing())
                 collapse_jewel(jewel);
+              points += points + 3;
             }
+            group_points = points * group.size();
+            increment += group_points;
+          }
+          if (increment)
+          {
+            score(increment);
           }
 				}
 
@@ -624,31 +639,38 @@ public:
 
 
           {
-            
 						// deal with the selected jewels, if any
             std::shared_ptr< jewel > first{}, second{};
-						if ((first = selected[0].lock()) && (second=selected[1].lock()))
+						if ((first = selected[0].lock()) && (second = selected[1].lock()))
 						{
-							if ( first->has_arrived() && !(first->has_collapsed() || first->is_collapsing()) &&
-								   second->has_arrived() && !(second->has_collapsed() || second->is_collapsing())  )
-							{
-                auto first_coords = make_map_coordinates_from_jewel(first.get());
-                auto second_coords = make_map_coordinates_from_jewel(second.get());
+              if ( first->has_arrived() && second->has_arrived() ) 
+              {
+							  if ( !first->is_collapsing() && !second->is_collapsing() )  
+							  {
+                  auto first_coords = make_map_coordinates_from_jewel(first.get());
+                  auto second_coords = make_map_coordinates_from_jewel(second.get());
 
-                assert(first_coords.first >= 0 && first_coords.first <= 7);
-                assert(first_coords.first >= 0 && first_coords.first <= 7);
-                assert(second_coords.second >= 0 && second_coords.second <= 7); 
-                assert(second_coords.second >= 0 && second_coords.second <= 7); 
-								swap(first_coords,second_coords);
-                selected[0].reset();
-                selected[1].reset();
-							}
-						}
-            else if (selected[0].expired())
+                  assert(first_coords.first >= 0 && first_coords.first <= 7);
+                  assert(first_coords.first >= 0 && first_coords.first <= 7);
+                  assert(second_coords.second >= 0 && second_coords.second <= 7); 
+                  assert(second_coords.second >= 0 && second_coords.second <= 7); 
+								  swap(first_coords,second_coords);
+                  selected[0].reset();
+                  selected[1].reset();
+							  }
+                else
+                {
+                  selected[0].reset();
+                  selected[1].reset();
+                }
+						 }
+          }
+         /*   else if (selected[0].expired())
             {
               selected[0].reset(); 
               selected[1].reset();
             }
+            */
 					}
           
           
@@ -691,9 +713,10 @@ public:
 
 				void on_clicked(const SDL_MouseButtonEvent& b)
 				{
+          std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+          std::cout << fn << "enter" << std::endl;
           yage::input::mouse& m = yage::input::mouse::instance();
 
-					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
 
 					if (moving.size() > 0 || collapsing.size() > 0)
 					{
@@ -737,13 +760,22 @@ public:
 				{
 					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
 
-
+          selected[0].reset();
+          selected[1].reset();
 				}
        
         /// Swaps two adjacent jewels,
 				/// causes the two jewels to change places in logical map and acelerate towards the each others' location.
 				void swap(const map_coordinates& f, const map_coordinates& s)
         {
+          std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+          auto col_distance = std::max(f.first,s.first) - std::min(f.first,s.first);
+          auto lin_distance = std::max(f.second,s.second) - std::min(f.second,s.second);
+          if (col_distance + lin_distance > 1)
+          {
+            std::cout << fn << "too far away for a swap." << std::endl;
+            return ;
+          }
           auto fi = map[ f.first ][ f.second ];
           auto se = map[ s.first ][ s.second ];
 					auto e = fi;
@@ -758,6 +790,13 @@ public:
 				
         void swap(const uint8_t& f_col, const uint8_t& f_lin, const uint8_t& s_col, const uint8_t& s_lin)
         {
+          std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
+          if ((std::max(f_col,s_col) - std::min(f_col,f_col) > 1) ||
+              (std::max(f_lin,s_lin) - std::min(f_lin,s_lin) > 1))
+          {
+            std::cout << fn << "too far away for a swap." << std::endl;
+            return ;
+          }
           auto first = make_map_coordinates_from_col_and_lin(f_col, f_lin);
           auto second = make_map_coordinates_from_col_and_lin(s_col, s_lin);
 

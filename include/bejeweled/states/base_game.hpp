@@ -12,6 +12,7 @@
 
 #  include <yage/widgets/label.hpp>
 
+#  include <bejeweled/widgets/score.hpp>
 #  include <bejeweled/widgets/grid.hpp>
 #  include <bejeweled/widgets/jewel.hpp>
 
@@ -30,7 +31,7 @@ class base_game:
 {
 private:
   yage::graphics::texture background;
-  yage::widgets::label m;
+  bejeweled::widgets::score score;
   bejeweled::widgets::grid< bejeweled::widgets::random_generator< 8,8,32,32 > > grid;
 protected:
 

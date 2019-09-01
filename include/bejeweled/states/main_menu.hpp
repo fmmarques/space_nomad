@@ -2,9 +2,12 @@
 #  define STATES_MAIN_MENU_HPP
 
 #  include <list>
+
 #  include <yage/input/input_listener.hpp>
 #  include <yage/engine/game_state.hpp>
 #  include <yage/graphics/texture.hpp>
+#  include <yage/widgets/button.hpp>
+
 namespace bejeweled {
   namespace states {
     namespace interface1 {
@@ -19,7 +22,7 @@ enum class option
 };
 	
 class main_menu: 
-   public virtual yage::input::input_listener
+   public virtual yage::input::mouse_listener
  , public virtual yage::engine::game_state
  , public yage::engine::base_game_state< main_menu >
 {
@@ -28,6 +31,8 @@ private:
   option selected_option;
 
   yage::graphics::texture background;
+  yage::widgets::button newgame, quitgame;
+  SDL_Rect newgame_r, quitgame_r;
 protected:
 
 public:
@@ -41,9 +46,6 @@ public:
   void on_interrupt();   // not on the interface...
   void on_frame();       // not on the interface...
 
-// keyboard listener callbacks,
-  void on_keycode_pressed(const SDL_Keysym& sym) override;
-  void on_keycode_released(const SDL_Keysym& sym) override;
 // mouse listener callbacks,
   void on_mouse_button_down(const SDL_MouseButtonEvent& button) override;
   void on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
