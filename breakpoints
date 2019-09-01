@@ -1,0 +1,3 @@
+catch throw
+catch catch
+break grid<bejeweled::widgets::interface1::random_generator<8u, 8u, 32u, 32u> >::make_hints_from_subgroup(std::vector<bejeweled::widgets::interface1::jewel*, std::allocator<bejeweled::widgets::interface1::jewel*> > const&)

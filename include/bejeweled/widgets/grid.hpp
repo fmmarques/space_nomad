@@ -225,7 +225,7 @@ protected:
         {
           map_coordinates result{ -1, -1 };
           
-          assert(col >= 0 && col <= 7 && lin >= 0 && lin <= 7);
+          //assert(col >= 0 && col <= 7 && lin >= 0 && lin <= 7);
 
           result.first = col;
           result.second = lin;
@@ -328,6 +328,175 @@ protected:
 				}
 
 // Group related methods
+        // Searches for first matching jewel of type, in a cruciform pattern, from a given coordinate.
+        jewel* get_jewel_in_vicinity_with_type(const map_coordinates& center, const jewel_type& t, const std::vector< map_coordinates > exceptions)
+        {
+          auto c = center;
+          auto col = c.first;
+          auto lin = c.second;
+          assert(map[col][lin]->type() != t);
+
+          if ((col - 1 >= 0) && map[col-1][lin]->type() == t)
+          {
+            c.first -= 1;
+            if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
+              return map[col-1][lin].get();
+            c.first +=1;
+          }
+
+          if ((col + 1 <= 7) && map[col+1][lin]->type() == t)
+          {
+            c.first += 1;
+            if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
+              return map[col+1][lin].get();
+            c.first -=1;
+          }
+          if ((lin - 1 >= 0) && map[col][lin-1]->type() == t)
+          {  
+            c.second -= 1;
+            if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
+              return map[col][lin-1].get();
+          }
+          if ((lin + 1 <= 7) && map[col][lin+1]->type() == t)
+          {  
+            c.second += 1;
+            if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) != std::cend(exceptions))
+            return map[col][lin+1].get();
+          }
+          return nullptr;
+        }
+
+        std::list< jewel * > make_hints_from_jewel(jewel *j)
+        {
+/*
+        C
+       BOB
+      COAOC
+       BOB
+        C
+*/
+          std::list< jewel * > subgroup {};
+          assert(j != nullptr);
+          
+          std::vector < jewel * > exceptions {};
+
+          auto cc = make_map_coordinates_from_jewel(j);
+          auto ulc = make_map_coordinates_from_col_and_lin( cc.first - 1, cc.second - 1 );
+          auto urc = make_map_coordinates_from_col_and_lin( cc.first - 1, cc.second + 1 );
+          auto dlc = make_map_coordinates_from_col_and_lin( cc.first + 1, cc.second - 1 );
+          auto drc = make_map_coordinates_from_col_and_lin( cc.first + 1, cc.second + 1 );
+          auto tlc = make_map_coordinates_from_col_and_lin( cc.first, cc.second - 2 );
+          auto tuc = make_map_coordinates_from_col_and_lin( cc.first - 2, cc.second );
+          auto trc = make_map_coordinates_from_col_and_lin( cc.first, cc.second + 2 );
+          auto tdc = make_map_coordinates_from_col_and_lin( cc.first + 2, cc.second );
+
+          
+          subgroup.insert(subgroup.end(), j);
+          if (ulc.first != 255 && ulc.second != 255 && j->type() == map[ulc.first][ulc.second]->type())
+          {
+            subgroup.insert(subgroup.end(), map[ulc.first][ulc.second].get());
+            if (tuc.first != 255 && tuc.first != 255 && j->type() == map[tuc.first][tuc.second]->type())
+            {
+              subgroup.insert(subgroup.end(), map[tuc.first][tuc.second].get());
+              return subgroup;
+            }
+            else if (tlc.first != 255 && tlc.first != 255 && j->type() == map[tlc.first][tlc.second]->type())
+            {
+              subgroup.insert(subgroup.end(), map[tlc.first][tlc.second].get());
+            }
+            subgroup.pop_back();
+          }
+          else if (urc.first != 255 && urc.second != 255 && j->type() == map[urc.first][urc.second]->type())
+          {
+            subgroup.insert(subgroup.end(), map[urc.first][urc.second].get());
+            if (tuc.first != 255 && tuc.first != 255 && j->type() == map[tuc.first][tuc.second]->type())
+            {
+              subgroup.insert(subgroup.end(), map[tuc.first][tuc.second].get());
+              return subgroup;
+            }
+            else if (trc.first != 255 && trc.first != 255 && j->type() == map[trc.first][trc.second]->type())
+            {
+              subgroup.insert(subgroup.end(), map[trc.first][trc.second].get());
+            }
+            subgroup.pop_back();
+          }
+
+
+        }
+        
+        std::list< jewel * > make_hints_from_subgroup(const std::vector< jewel * >& subgroup)
+        {
+          std::list< jewel * > result {};
+          jewel *center = nullptr, *bottom = nullptr, *right = nullptr, *candidate = nullptr;
+          map_coordinates center_coords, bottom_coords, right_coords;
+
+          assert (subgroup.size() <= 2);
+          
+          right = bottom = center = *(subgroup.begin());
+          right_coords = bottom_coords = center_coords = make_map_coordinates_from_jewel( center );
+          for (auto&& curr_jewel : subgroup)
+          {
+            auto curr_coords = make_map_coordinates_from_jewel(curr_jewel);
+            if (bottom_coords.first < curr_coords.first)
+            {
+              bottom = curr_jewel;
+              bottom_coords = make_map_coordinates_from_jewel(bottom);
+            }
+
+            if (right_coords.second < curr_coords.second)
+            {
+              right = curr_jewel;
+              right_coords = make_map_coordinates_from_jewel(right);
+            } 
+          
+          }
+          assert( (bottom != nullptr)^(right != nullptr) ); //it's either a vertical or a horizontal subgroup.
+
+          if (bottom) 
+          // We are dealing with a vertical subgroup, center being the top-most jewel and,
+          {
+            map_coordinates above_coords = center_coords, below_coords = bottom_coords;
+            above_coords.first -= 1;
+            below_coords.first += 1;
+            if (candidate = get_jewel_in_vicinity_with_type(above_coords, center->type(), { center_coords } )) 
+            // we found a candidate for swapping with the jewel above the subgroup
+            {
+              result.insert(result.end(), map[above_coords.first][above_coords.second].get());
+              result.insert(result.end(), candidate);
+            }
+            else if (candidate = get_jewel_in_vicinity_with_type(below_coords, center->type(), { bottom_coords }))
+            // we found a candidate for swapping with the jewel below the subgroup
+            {
+              result.insert(result.end(), map[below_coords.first][below_coords.second].get());
+              result.insert(result.end(), candidate);
+            }
+          }
+          else if (right)
+          // We are dealing with a horizontal subgroup, center being the left-most jewel and,
+          {
+            map_coordinates one_left_coords = center_coords, one_right_coords = right_coords;
+            one_left_coords.second -= 1;
+            one_right_coords.first += 1;
+            if (candidate = get_jewel_in_vicinity_with_type(one_left_coords, center->type(), { center_coords })) 
+            // we found a candidate for swapping with the jewel above the subgroup
+            {
+              result.insert(result.end(), map[one_left_coords.first][one_left_coords.second].get());
+              result.insert(result.end(), candidate);
+            }
+            else if (candidate = get_jewel_in_vicinity_with_type(one_right_coords, center->type(), { right_coords } ))
+            // we found a candidate for swapping with the jewel below the subgroup
+            {
+              result.insert(result.end(), map[one_right_coords.first][one_right_coords.second].get());
+              result.insert(result.end(), candidate);
+            }
+          }
+          else 
+          {
+
+          }
+          return result;
+        }
+
          // Returns a group from the grid coordinate given
          // @arg col the column
          // @arg lin the lin
@@ -335,11 +504,11 @@ protected:
          // @note this is an auxiliary method to determine which jewels should collapse
 				std::vector< jewel * > make_collapsing_group_from(int col, int lin)
 				{
-					std::array < jewel *, 8 > tmp;
-					std::vector < jewel * > result{};
+					std::array < jewel *, 8 > subgroup {};
+					std::vector < jewel * > group{}, hint{};
           assert(col < 8 &&  lin < 8);
 					if (map[col][lin]->has_collapsed() || map[col][lin]->is_collapsing() || map[col][lin]->is_moving())
-						return result;
+						return group;
 
 
 					int pos = 0, top_most_subgroup_element = 0, bottom_most_subgroup_element = 0;
@@ -349,7 +518,7 @@ protected:
                 map[coln][lin]->type() == map[col][lin]->type();
 						    coln--, pos++, top_most_subgroup_element++)
           {
-						tmp[pos] = map[coln][lin].get();
+						subgroup[pos] = map[coln][lin].get();
           }
 
 					for ( int coln = col + 1;
@@ -358,26 +527,21 @@ protected:
                 map[coln][lin]->type() == map[col][lin]->type();
 						    coln++, pos++, bottom_most_subgroup_element++) 
           {
-						tmp[pos] = map[coln][lin].get();
+						subgroup[pos] = map[coln][lin].get();
           }
 
-					if (pos + 1 >= 3) // yey, a group
+					if (pos >= 2) // yey, a group
           {
-						result.insert(result.begin(), tmp.begin(), tmp.begin() + pos);
+						group.insert(group.begin(), subgroup.begin(), subgroup.begin() + pos);
           }
-          else if (pos + 1 == 2) // maybe a hint?
+          else if (pos)
           {
-            jewel * above = nullptr, bellow = nullptr, top = nullptr, left = nullptr, bottom = nullptr, right = nullptr;
-            int curr_col = -1;
-            curr_col = (col - top_most_subgroup_element - 1);
-            if (curr_col >= 0)
-              above = map[curr_col][lin];
-            curr_col = (col + bottom_most_subgroup_element + 1);
-            if (curr_col <= 7)
-              bellow = map[curr_col][lin];
-
-            if (
-
+            auto subgroup_copy = std::vector< jewel *>{ map[col][lin].get(), subgroup[0] };
+//            hints = make_hints_from_subgroup(subgroup_copy);
+          }
+          else 
+          {
+//            hints = make_hints_from_jewel( map[col][lin].get() );
           }
 
 					pos = 0;
@@ -387,7 +551,7 @@ protected:
                 map[col][linn]->type() == map[col][lin]->type();
 						    linn--, pos++)
           {
-					  tmp[pos] = (map[col][linn]).get();
+					  subgroup[pos] = (map[col][linn]).get();
           }
 
 					for ( int linn = lin + 1;
@@ -396,17 +560,28 @@ protected:
                 map[col][linn]->type() == map[col][lin]->type();
 						    linn++, pos++)
           {
-						tmp[pos] = (map[col][linn]).get();
+						subgroup[pos] = (map[col][linn]).get();
           }
 
 					if (pos + 1 >= 3)
-						result.insert(result.begin(), tmp.begin(), tmp.begin() + pos);
+          {
+						group.insert(group.begin(), subgroup.begin(), subgroup.begin() + pos);
+            if (hints.empty())
+            {
+              auto subgroup_copy = std::vector< jewel * >( subgroup.begin(), subgroup.end());
+              subgroup_copy.insert(subgroup_copy.end(), map[col][lin].get());
+              hints = make_hints_from_subgroup(subgroup_copy);
+            }
+          }
 
-					if (result.size() >= 2)
-						result.insert(result.begin(), map[col][lin].get());
+					if (group.size() >= 2)
+          {
+						group.insert(group.begin(), map[col][lin].get());
+            hints.clear();
+          }
 
           { // invariants assert
-            for ( auto&& j : result )
+            for ( auto&& j : group )
             {
               assert(!j->is_collapsing());
               assert(!j->is_moving());
@@ -414,7 +589,7 @@ protected:
               assert(!j->has_collapsed());
             }
           }
-					return result;
+					return group;
 				}
 
         // Initiates the collapsing sequence for all the groups on the map.
@@ -459,6 +634,7 @@ protected:
 										next.emplace(jewel);
 									}
 								}
+                seen.emplace(map[col][lin].get());
 							} while (!next.empty());
 
 							if (group.size() > 0)
