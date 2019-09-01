@@ -171,6 +171,9 @@ namespace bejeweled {
       /// the jewels collapsing
       std::list<  jewel * > collapsing;
 
+      /// the next subgroups
+      std::list< jewel * > hints;
+
       /// the jewels selected by the user;
       std::vector< std::weak_ptr< jewel > > selected;
 
@@ -184,7 +187,6 @@ namespace bejeweled {
         assert(_score >= 0);
         for (auto&& j : collapsing)
         {
-          
           assert(j->is_collapsing() || j->has_collapsed());
           assert(j->has_arrived() && !j->is_moving());
         }
@@ -196,7 +198,6 @@ namespace bejeweled {
           assert(!j->has_collapsed() && !j->is_collapsing());
 				}
 
-        
 			}
 
 protected:
@@ -341,12 +342,12 @@ protected:
 						return result;
 
 
-					int pos = 0;
+					int pos = 0, top_most_subgroup_element = 0, bottom_most_subgroup_element = 0;
 					for ( int coln = col - 1;
                 coln >= 0 && 
                 !map[coln][lin]->has_collapsed() && !map[coln][lin]->is_collapsing() && !map[coln][lin]->is_moving() && 
                 map[coln][lin]->type() == map[col][lin]->type();
-						    coln--, pos++)
+						    coln--, pos++, top_most_subgroup_element++)
           {
 						tmp[pos] = map[coln][lin].get();
           }
@@ -355,13 +356,29 @@ protected:
 						    coln < 8 && 
                 !map[coln][lin]->has_collapsed() && !map[coln][lin]->is_collapsing() && !map[coln][lin]->is_moving() && 
                 map[coln][lin]->type() == map[col][lin]->type();
-						    coln++, pos++) 
+						    coln++, pos++, bottom_most_subgroup_element++) 
           {
 						tmp[pos] = map[coln][lin].get();
           }
 
-					if (pos + 1 >= 3)
+					if (pos + 1 >= 3) // yey, a group
+          {
 						result.insert(result.begin(), tmp.begin(), tmp.begin() + pos);
+          }
+          else if (pos + 1 == 2) // maybe a hint?
+          {
+            jewel * above = nullptr, bellow = nullptr, top = nullptr, left = nullptr, bottom = nullptr, right = nullptr;
+            int curr_col = -1;
+            curr_col = (col - top_most_subgroup_element - 1);
+            if (curr_col >= 0)
+              above = map[curr_col][lin];
+            curr_col = (col + bottom_most_subgroup_element + 1);
+            if (curr_col <= 7)
+              bellow = map[curr_col][lin];
+
+            if (
+
+          }
 
 					pos = 0;
 					for ( int linn = lin - 1;
@@ -442,7 +459,6 @@ protected:
 										next.emplace(jewel);
 									}
 								}
-								seen.emplace(curr);
 							} while (!next.empty());
 
 							if (group.size() > 0)
