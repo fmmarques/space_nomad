@@ -11,10 +11,12 @@
 #  include <yage/graphics/texture.hpp>
 
 #  include <yage/widgets/label.hpp>
+#  include <yage/widgets/button.hpp>
 
 #  include <bejeweled/widgets/score.hpp>
 #  include <bejeweled/widgets/grid.hpp>
 #  include <bejeweled/widgets/jewel.hpp>
+#  include <bejeweled/widgets/grid_event_listener.hpp>
 
 namespace bejeweled {
   namespace states {
@@ -27,12 +29,17 @@ namespace bejeweled {
 class base_game: 
    public virtual yage::input::input_listener
  , public virtual yage::engine::game_state
+ , public virtual bejeweled::widgets::grid_event_listener
  , public yage::engine::base_game_state< base_game >
 {
 private:
   yage::graphics::texture background;
   bejeweled::widgets::score score;
-  bejeweled::widgets::grid< bejeweled::widgets::random_generator< 8,8,32,32 > > grid;
+  bejeweled::widgets::grid grid;
+  yage::widgets::button hint;
+  SDL_Rect hint_r, gameover_widget_r;
+  bool gameover;
+  yage::widgets::button gameover_widget;
 protected:
 
 public:
@@ -56,7 +63,8 @@ public:
   void on_mouse_movement(const SDL_MouseMotionEvent& button) override;
 
 
-
+  void on_score_change(int new_score); 
+  void on_game_over();
 };	
 
     }

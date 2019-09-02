@@ -52,6 +52,7 @@ set(BEJEWELED_SOURCES
   # widgets
     src/widgets/jewel.cpp
     src/widgets/grid.cpp
+    src/widgets/grid_generators.cpp
     src/widgets/score.cpp
 )
 add_executable(bejeweled ${BEJEWELED_SOURCES}) 

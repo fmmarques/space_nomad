@@ -10,149 +10,20 @@
 #include <yage/graphics/spritesheet.hpp>
 #include <yage/input/mouse.hpp>
 
+
 #include <bejeweled/widgets/grid_event_listener.hpp>
+#include <bejeweled/widgets/grid_generators.hpp>
 #include <bejeweled/widgets/jewel.hpp>
 
 namespace bejeweled {
-	namespace widgets {
-		namespace interface1 {
+namespace widgets {
+    namespace interface1 {
 
 
-			template < typename map_generator_t > class grid;
-			
-			template < unsigned int LINES, unsigned int COLUMNS, unsigned int JEWEL_WIDTH, unsigned int JEWEL_HEIGHT >
-			class random_generator
-			{
-			private:
-				random_generator();
-
-      protected:
-        static void fill_column(
-            std::shared_ptr<jewel> map[8][8],
-            std::list<  jewel * >& moving,
-            int column,
-            int x,
-            int y
-        ){
-          int falling_jewels = 0;
-          int collapsed_jewels = 0;
-          for (auto line = 0; line < 8; line++)
-          {
-            if (!map[column][line]->has_collapsed())
-            {
-              falling_jewels++;
-              continue;
-            }
-            collapsed_jewels++;
-
-            for (auto jewels_fallen = 0 ; jewels_fallen < falling_jewels; jewels_fallen++)
-            {
-              auto current_falling_jewel = line - jewels_fallen - 1 ;
-              auto squashed_jewel = line - jewels_fallen;
-              std::shared_ptr< jewel > j {};
-
-//              if (squashed_jewel <= 0)
-//              {
-                //j = nullptr; //std::make_shared< widgets::jewel >( make_jewel(x + column*JEWEL_WIDTH, y - JEWEL_HEIGHT)  );
-//                continue;
-//              }
-//              else
-//              {
-                j = map[column][current_falling_jewel];
-//              }
-
-//              if (j)
-//              {
-                assert(!j->is_collapsing() && !j->has_collapsed());
-                j->dy(squashed_jewel * JEWEL_HEIGHT + y);
-                j->vel(4);
-                map[column][squashed_jewel] = j;
-                moving.insert(moving.end(), j.get());
-//              }
-              
-              //assert(j->dy() != j->y());
-              
-            }
-          }
-          
-          std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-          for ( auto inserted_jewel = collapsed_jewels; inserted_jewel > 0; inserted_jewel--)
-          {
-            auto&& j = std::make_shared< widgets::jewel >(make_jewel( x + column * JEWEL_WIDTH, y - inserted_jewel*JEWEL_HEIGHT ));
-            auto dy = j->y()+collapsed_jewels * JEWEL_HEIGHT;
-            j->dy(dy);
-            j->vel(4);
-            map[column][collapsed_jewels - inserted_jewel] = j;
-            assert(j->dy() != j->y());
-//            std::cout << fn << "created a new jewel at <" << j->x() << "," << j->y() << "> directed towards <" << j->dx() << ", " << dy <<">." << std::endl;
-            moving.insert(moving.end(), j.get());
-          }
-
-      }
-      public:
-				static jewel make_jewel(int x, int y)
-				{
-          std::string fn { std::string(__PRETTY_FUNCTION__) + ": " };
-//          std::cout << fn << "enter. Arguments: { .x=" << x << ", .y=" << y << "}. ";
-
-					SDL_Rect screen
-					{
-						.x = static_cast<decltype(SDL_Rect::x)>(x),
-						.y = static_cast<decltype(SDL_Rect::y)>(y),
-						.w = static_cast<decltype(SDL_Rect::w)>(JEWEL_WIDTH),
-						.h = static_cast<decltype(SDL_Rect::h)>(JEWEL_HEIGHT)
-					};
-
-					jewel_type type = jewel_type::YELLOW;
-
-          auto itype = rand() % static_cast< unsigned int >(jewel_type::JEWEL_TYPE_COUNT);
-          type = static_cast<jewel_type>(itype);
-//          std::cout << "created a jewel at <" << screen.x << ", " << screen.y << ">" << std::endl;
-
-          return jewel(type, "assets/gems.spritesheet.transparent.png", screen, 0);
-
-        }
-
-      static void make_map(std::shared_ptr< jewel > map[LINES][COLUMNS], unsigned int subgroups, unsigned int x, unsigned int y)
-      {
-        srand(time(nullptr));
-        assert(0 <= x && x + JEWEL_WIDTH * COLUMNS <= 640);
-        assert(0 <= y && y + JEWEL_HEIGHT * LINES  <= 480);
-
-        for (auto col = 0; col < COLUMNS; col++) {
-          for (auto lin = 0; lin < LINES; lin++) {
-            map[col][lin] = std::make_shared<jewel>(make_jewel(x+col*JEWEL_WIDTH, y+lin*JEWEL_HEIGHT));
-          }
-        }
-      }
-
-      static void generate_jewels_in_columns_with_empty_spaces(
-          std::shared_ptr< jewel > map[8][8],
-          std::list<  jewel * >& moving,
-          int x,
-          int y
-      ) {
-        std::string fn ( std::string( __PRETTY_FUNCTION__) + std::string(": "));
-        //std::cout << fn << "enter. ";
-
-        for (auto&& col = 0; col < 8; col++) 
-        {
-/*
-            if (columns_with_free_slots[col].size() == 0)
-              continue;
-            std::cout << "column " << col << " is marked with " << columns_with_free_slots[col].size() << " empty spaces. ";
- */
-          fill_column(map, moving, col, x, y);
-        }
-        //std::cout << "exit." << std::endl;
-      }
-    };
-
-    template < typename map_generator_t >
     class grid
     {
     public:
-      static const uint32_t LINES = 8, COLUMNS = 8, SPACES = LINES * COLUMNS, JEWEL_WIDTH = 32, JEWEL_HEIGHT = 32;
+      static const int LINES = 8, COLUMNS = 8, SPACES = LINES * COLUMNS, JEWEL_WIDTH = 32, JEWEL_HEIGHT = 32;
       using map_coordinates  = std::pair< uint8_t, uint8_t> ;
       using screen_coordinates  = std::pair<int, int> ;
     private:
@@ -196,9 +67,9 @@ namespace bejeweled {
           assert(j->is_moving() || j->has_arrived());
           //assert(!(j->is_moving()) || j->vel() == 1);
           assert(!j->has_collapsed() && !j->is_collapsing());
-				}
+        }
 
-			}
+      }
 
 protected:
 // Score related methods
@@ -284,216 +155,349 @@ protected:
 
 
 // Jewel related methods,
-				// Initiates jewel movement by setting jewel's destination and velocity, and adding it to the moving bag
-				// @param j the jewel to be moved
+        // Initiates jewel movement by setting jewel's destination and velocity, and adding it to the moving bag
+        // @param j the jewel to be moved
         // @param map_destination the map coordinates holding the destination.
-				void move_jewel(jewel* j, const map_coordinates& map_destination)
-				{
-					assert(j != nullptr);
-          assert(0 <= map_destination.first && map_destination.first <= 7);
-          assert(0 <= map_destination.second && map_destination.second <= 7);
+        void move_jewel(jewel* j, const map_coordinates& map_destination)
+        {
+          assert(j != nullptr);
+          assert(0 <= map_destination.first && map_destination.first <= COLUMNS);
+          assert(0 <= map_destination.second && map_destination.second <= LINES);
 
           auto&& map_origin = make_map_coordinates_from_jewel(j);
           if (map_origin.first == -1 || map_origin.second == -1)
             return ;
-					assert(map_origin.first != map_destination.first || map_origin.second != map_destination.second);
+          assert(map_origin.first != map_destination.first || map_origin.second != map_destination.second);
           
           invariant();
-					auto screen_destination = make_screen_coordinates_from_map_coords(map_destination);
+          auto screen_destination = make_screen_coordinates_from_map_coords(map_destination);
           
           j->dx(screen_destination.first);
           j->dy(screen_destination.second);
           j->vel(4);
-					
+          
           moving.insert(moving.end(), j);
-					
+          
           invariant();
-				}
+        }
 
-				// Collapses a jewel by initiating the collapse animation and adding the jewel to the collapsing bag
+        // Collapses a jewel by initiating the collapse animation and adding the jewel to the collapsing bag
         // @arg j the jewel that undergoes the collapse.
-				void collapse_jewel(jewel* j)
-				{
-					assert(j != nullptr);
-					//invariant();
+        void collapse_jewel(jewel* j)
+        {
+          assert(j != nullptr);
+          //invariant();
           //
           assert(!j->is_moving());
           assert(!j->has_collapsed());
           assert(!j->is_collapsing());
           assert(j->has_arrived());
-					j->animation(jewel_animation_type::COLLAPSING);
-			    collapsing.insert(collapsing.end(), j);
+          j->animation(jewel_animation_type::COLLAPSING);
+          collapsing.insert(collapsing.end(), j);
 
-					//invariant();
-				}
+          //invariant();
+        }
 
 // Group related methods
         // Searches for first matching jewel of type, in a cruciform pattern, from a given coordinate.
         jewel* get_jewel_in_vicinity_with_type(const map_coordinates& center, const jewel_type& t, const std::vector< map_coordinates > exceptions)
         {
+          std::string fn { "get_j_vic: " }; //std::string( __PRETTY_FUNCTION__ ) + ": "};
+          if (!coords_are_valid(center))
+          {
+            std::cout << fn << "ignoring " << (int) center.first << ", " << (int)center.second << std::endl;
+            return nullptr;
+          }
+
           auto c = center;
           auto col = c.first;
           auto lin = c.second;
+          jewel * result = nullptr;
           assert(map[col][lin]->type() != t);
 
-          if ((col - 1 >= 0) && map[col-1][lin]->type() == t)
+          if ((col - 1 >= 0) && map[col-1][lin]->type() == t && map[col-1][lin]->is_collapsable())
           {
             c.first -= 1;
             if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
-              return map[col-1][lin].get();
+              result = map[col-1][lin].get();
             c.first +=1;
           }
 
-          if ((col + 1 <= 7) && map[col+1][lin]->type() == t)
+          if (!result && (col + 1 <= COLUMNS) && map[col+1][lin]->type() == t && map[col + 1][lin]->is_collapsable())
           {
             c.first += 1;
             if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
-              return map[col+1][lin].get();
+              result = map[col+1][lin].get();
             c.first -=1;
           }
-          if ((lin - 1 >= 0) && map[col][lin-1]->type() == t)
+          
+          if (!result && (lin - 1 >= 0) && map[col][lin-1]->type() == t && map[col][lin-1]->is_collapsable())
           {  
             c.second -= 1;
             if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
-              return map[col][lin-1].get();
+              result = map[col][lin-1].get();
+            c.second += 1;
           }
-          if ((lin + 1 <= 7) && map[col][lin+1]->type() == t)
+          
+          if (!result && (lin + 1 <= COLUMNS) && map[col][lin+1]->type() == t && map[col][lin+1]->is_collapsable())
           {  
             c.second += 1;
-            if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) != std::cend(exceptions))
-            return map[col][lin+1].get();
+            if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
+              result = map[col][lin+1].get();
+            c.second -= 1;
           }
-          return nullptr;
+
+          if (result)
+          {
+            auto m = make_map_coordinates_from_jewel(result);
+            std::cout << fn << "< < " << (int)col << ", " << (int)lin << " >, < " << (int)m.first << ", " << (int)m.second << "> >, " << t << std::endl;
+          } 
+          
+
+          return result;
         }
+
+        bool coords_are_valid(const map_coordinates& coords)
+        {
+          return coords.first >= 0 && coords.first <= COLUMNS && coords.second >= 0 && coords.second <= LINES && map[coords.first][coords.second].get() != nullptr;
+        }
+        
 
         std::list< jewel * > make_hints_from_jewel(jewel *j)
         {
-/*
+/* This function follows the diamond search pattern, in the fig below. We first search for the diagonals (B)
+ * and if any are the same type as A, we then search for C's, clockwise
         C
        BOB
       COAOC
        BOB
         C
+   
 */
+          std::string fn { "hint from jewel: " }; 
+          
           std::list< jewel * > subgroup {};
           assert(j != nullptr);
+          if (!j->is_collapsable())
+            return subgroup;
           
           std::vector < jewel * > exceptions {};
 
           auto cc = make_map_coordinates_from_jewel(j);
           auto ulc = make_map_coordinates_from_col_and_lin( cc.first - 1, cc.second - 1 );
-          auto urc = make_map_coordinates_from_col_and_lin( cc.first - 1, cc.second + 1 );
-          auto dlc = make_map_coordinates_from_col_and_lin( cc.first + 1, cc.second - 1 );
+          auto urc = make_map_coordinates_from_col_and_lin( cc.first + 1, cc.second - 1 );
+          auto dlc = make_map_coordinates_from_col_and_lin( cc.first - 1, cc.second + 1 );
           auto drc = make_map_coordinates_from_col_and_lin( cc.first + 1, cc.second + 1 );
-          auto tlc = make_map_coordinates_from_col_and_lin( cc.first, cc.second - 2 );
-          auto tuc = make_map_coordinates_from_col_and_lin( cc.first - 2, cc.second );
-          auto trc = make_map_coordinates_from_col_and_lin( cc.first, cc.second + 2 );
-          auto tdc = make_map_coordinates_from_col_and_lin( cc.first + 2, cc.second );
+          auto tlc = make_map_coordinates_from_col_and_lin( cc.first - 2, cc.second);
+          auto tuc = make_map_coordinates_from_col_and_lin( cc.first, cc.second - 2 );
+          auto trc = make_map_coordinates_from_col_and_lin( cc.first + 2, cc.second );
+          auto tdc = make_map_coordinates_from_col_and_lin( cc.first, cc.second + 2 );
 
           
-          subgroup.insert(subgroup.end(), j);
-          if (ulc.first != 255 && ulc.second != 255 && j->type() == map[ulc.first][ulc.second]->type())
+          //subgroup.insert(subgroup.end(), j);
+          if (coords_are_valid(ulc) && j->type() == map[ulc.first][ulc.second]->type() && map[ulc.first][ulc.second]->is_collapsable())
+          // Up left quadrant
           {
-            subgroup.insert(subgroup.end(), map[ulc.first][ulc.second].get());
-            if (tuc.first != 255 && tuc.first != 255 && j->type() == map[tuc.first][tuc.second]->type())
+            //subgroup.insert(subgroup.end(), map[ulc.first][ulc.second].get());
+            if (coords_are_valid(tuc) && j->type() == map[tuc.first][tuc.second]->type() && map[tuc.first][tuc.second]->is_collapsable())
             {
-              subgroup.insert(subgroup.end(), map[tuc.first][tuc.second].get());
-              return subgroup;
+              fn += "ulc, tuc";
+              subgroup.insert(subgroup.end(), map[ulc.first][ulc.second].get());
+              subgroup.insert(subgroup.end(), map[ulc.first + 1][ulc.second].get());
+              goto print_subgroup;
             }
-            else if (tlc.first != 255 && tlc.first != 255 && j->type() == map[tlc.first][tlc.second]->type())
+            else if (coords_are_valid(tlc) && j->type() == map[tlc.first][tlc.second]->type() && map[tlc.first][tlc.second]->is_collapsable())
             {
-              subgroup.insert(subgroup.end(), map[tlc.first][tlc.second].get());
+              fn += "ulc, tlc";
+              subgroup.insert(subgroup.end(), map[ulc.first][ulc.second].get());
+              subgroup.insert(subgroup.end(), map[ulc.first][tlc.second + 1].get());
+              goto print_subgroup;
             }
-            subgroup.pop_back();
           }
-          else if (urc.first != 255 && urc.second != 255 && j->type() == map[urc.first][urc.second]->type())
+          else if (coords_are_valid(urc) && j->type() == map[urc.first][urc.second]->type() && map[urc.first][urc.second]->is_collapsable())
+          // Up right quadrant
           {
-            subgroup.insert(subgroup.end(), map[urc.first][urc.second].get());
-            if (tuc.first != 255 && tuc.first != 255 && j->type() == map[tuc.first][tuc.second]->type())
+            if (coords_are_valid(tuc) && j->type() == map[tuc.first][tuc.second]->type() && map[tuc.first][tuc.second]->is_collapsable())
             {
-              subgroup.insert(subgroup.end(), map[tuc.first][tuc.second].get());
-              return subgroup;
+              fn += "urc, tuc";
+              subgroup.insert(subgroup.end(), map[urc.first][urc.second].get());
+              subgroup.insert(subgroup.end(), map[urc.first - 1][urc.second].get());
             }
-            else if (trc.first != 255 && trc.first != 255 && j->type() == map[trc.first][trc.second]->type())
+            else if ( coords_are_valid(trc) && j->type() == map[trc.first][trc.second]->type() && map[trc.first][trc.second]->is_collapsable())
             {
-              subgroup.insert(subgroup.end(), map[trc.first][trc.second].get());
+              fn += "urc, trc";
+              subgroup.insert(subgroup.end(), map[urc.first][urc.second].get());
+              subgroup.insert(subgroup.end(), map[urc.first][urc.second + 1].get());
+              goto print_subgroup;
             }
-            subgroup.pop_back();
+          }
+          else if (coords_are_valid(drc) && j->type() == map[drc.first][drc.second]->type() && map[drc.first][drc.second]->is_collapsable())
+          // Down right quadrant
+          {
+            if (coords_are_valid(trc) && j->type() == map[trc.first][trc.second]->type() && map[trc.first][trc.second]->is_collapsable())
+            {
+              fn += "drc, trc";
+              subgroup.insert(subgroup.end(), map[drc.first][drc.second].get());
+              subgroup.insert(subgroup.end(), map[drc.first][drc.second - 1].get());
+            }
+            else if ( coords_are_valid(tdc) && j->type() == map[tdc.first][tdc.second]->type() && map[tdc.first][tdc.second]->is_collapsable())
+            {
+              fn += "drc, tdc";
+              subgroup.insert(subgroup.end(), map[drc.first][drc.second].get());
+              subgroup.insert(subgroup.end(), map[drc.first - 1][drc.second].get());
+              goto print_subgroup;
+            }
+          }
+          else if (coords_are_valid(dlc) && j->type() == map[dlc.first][dlc.second]->type() && map[dlc.first][dlc.second]->is_collapsable())
+          // Down left quadrant
+          {
+            if (coords_are_valid(tdc) && j->type() == map[tdc.first][tdc.second]->type() && map[tdc.first][tdc.second]->is_collapsable())
+            {
+              fn += "dlc, tdc";
+              subgroup.insert(subgroup.end(), map[dlc.first][dlc.second].get());
+              subgroup.insert(subgroup.end(), map[dlc.first + 1][dlc.second].get());
+            }
+            else if (coords_are_valid(tlc) && j->type() == map[tlc.first][tlc.second]->type() && map[tlc.first][tlc.second]->is_collapsable())
+            {
+              fn += "dlc, tlc";
+              subgroup.insert(subgroup.end(), map[dlc.first][dlc.second].get());
+              subgroup.insert(subgroup.end(), map[dlc.first][dlc.second - 1].get());
+              goto print_subgroup;
+            }
           }
 
+
+
+
+print_subgroup:
+          if (!subgroup.empty())
+          {
+          std::cout << fn << " { ";
+          for ( auto j : subgroup )
+          {
+            auto m = make_map_coordinates_from_jewel(j);
+            std::cout << "{ .col " << (int) m.first << " .lin " << (int) m.second << " } ";
+          }
+          std::cout << " } " << std::endl;
+          }
+          return subgroup;
 
         }
-        
-        std::list< jewel * > make_hints_from_subgroup(const std::vector< jewel * >& subgroup)
+       
+        std::list< jewel * > make_hints_from_horizontal_subgroup(const std::vector< jewel * >& subgroup)
         {
+          std::string fn { "make_hints_hor " };//std::string( __PRETTY_FUNCTION__ ) + ": "};
           std::list< jewel * > result {};
-          jewel *center = nullptr, *bottom = nullptr, *right = nullptr, *candidate = nullptr;
-          map_coordinates center_coords, bottom_coords, right_coords;
+          jewel *center = nullptr, *right = nullptr, *candidate = nullptr;
+          map_coordinates center_coords, right_coords;
 
           assert (subgroup.size() <= 2);
           
-          right = bottom = center = *(subgroup.begin());
-          right_coords = bottom_coords = center_coords = make_map_coordinates_from_jewel( center );
-          for (auto&& curr_jewel : subgroup)
+          right = center = *(subgroup.begin());
+          right_coords = center_coords = make_map_coordinates_from_jewel( center );
+          for (auto curr_jewel : subgroup)
           {
             auto curr_coords = make_map_coordinates_from_jewel(curr_jewel);
-            if (bottom_coords.first < curr_coords.first)
+            if (right_coords.first < curr_coords.first)
+            {
+              right = curr_jewel;
+              right_coords = make_map_coordinates_from_jewel(right);
+            }
+            else if (center_coords.first > curr_coords.first)
+            {
+              center = curr_jewel;
+              center_coords = make_map_coordinates_from_jewel(center);
+            }
+            std::cout << "<" << (int)curr_coords.first << ", " << (int)curr_coords.second << ">\n";
+          }
+          assert( (right != nullptr) ); //it's either a vertical or a horizontal subgroup.
+          assert( (center != right) );
+          assert( center->type() == right->type());
+          assert( center_coords.first < right_coords.first );
+          assert( right->is_collapsable() && center->is_collapsable());
+          
+          map_coordinates one_left_coords = center_coords, 
+                          one_right_coords = right_coords;
+          one_left_coords.first -= 1;
+          one_right_coords.first += 1;
+
+          if (one_left_coords.first >= 0 && (candidate = get_jewel_in_vicinity_with_type(one_left_coords, center->type(), { center_coords }))) 
+          // we found a candidate for swapping with the jewel above the subgroup
+          {
+            result.insert(result.end(), map[one_left_coords.first][one_left_coords.second].get());
+            result.insert(result.end(), candidate);
+          }
+          else if (one_right_coords.first <= COLUMNS && (candidate = get_jewel_in_vicinity_with_type(one_right_coords, center->type(), { right_coords } )))
+          // we found a candidate for swapping with the jewel below the subgroup
+          {
+            result.insert(result.end(), map[one_right_coords.first][one_right_coords.second].get());
+            result.insert(result.end(), candidate);
+          }
+
+          std::cout << fn << "(" << (int)center_coords.first << ", " << (int)center_coords.second << "){ ";
+          for (auto&& j: result)
+          {
+            auto m = make_map_coordinates_from_jewel( j);
+            std::cout << " { .col " << (int) m.first << " .lin " << (int) m.second << " } ";
+          }
+          std::cout << " } " << std::endl;
+          return result;
+        }
+ 
+        std::list< jewel * > make_hints_from_vertical_subgroup(const std::vector< jewel * >& subgroup)
+        {
+          std::string fn { "make_hints_ver" };//std::string( __PRETTY_FUNCTION__ ) + ": "};
+          std::list< jewel * > result {};
+          jewel *center = nullptr, *bottom = nullptr, *candidate = nullptr;
+          map_coordinates center_coords, bottom_coords ;
+
+          assert (subgroup.size() <= 2);
+          
+          bottom = center = *(subgroup.begin());
+          bottom_coords = center_coords = make_map_coordinates_from_jewel( center );
+          for (auto&& curr_jewel : subgroup)
+          {
+
+            auto curr_coords = make_map_coordinates_from_jewel(curr_jewel);
+            if (bottom_coords.second < curr_coords.second)
             {
               bottom = curr_jewel;
               bottom_coords = make_map_coordinates_from_jewel(bottom);
             }
-
-            if (right_coords.second < curr_coords.second)
+            else if (center_coords.second > curr_coords.second)
             {
-              right = curr_jewel;
-              right_coords = make_map_coordinates_from_jewel(right);
-            } 
+              center = curr_jewel;
+              center_coords = make_map_coordinates_from_jewel(center);
+            }
+
+          }
+          assert( (bottom != nullptr) );
+          assert( bottom != center );
+          assert( center_coords.second < bottom_coords.second  && center_coords.first == bottom_coords.first );
+
+          map_coordinates above_coords = center_coords, below_coords = bottom_coords;
+          above_coords.second -= 1;
+          below_coords.second += 1;
+          if (above_coords.second >= 0 && (candidate = get_jewel_in_vicinity_with_type(above_coords, center->type(), { center_coords } ))) 
+          // we found a candidate for swapping with the jewel above the subgroup
+          {
+            result.insert(result.end(), map[above_coords.first][above_coords.second].get());
+            result.insert(result.end(), candidate);
+          }
+          else if (below_coords.first <= COLUMNS && (candidate = get_jewel_in_vicinity_with_type(below_coords, center->type(), { bottom_coords })))
+          // we found a candidate for swapping with the jewel below the subgroup
+          {
+            result.insert(result.end(), map[below_coords.first][below_coords.second].get());
+            result.insert(result.end(), candidate);
+          }
           
-          }
-          assert( (bottom != nullptr)^(right != nullptr) ); //it's either a vertical or a horizontal subgroup.
-
-          if (bottom) 
-          // We are dealing with a vertical subgroup, center being the top-most jewel and,
+          std::cout << fn << "(" << (int)center_coords.first << ", " << (int)center_coords.second << "){ ";
+          for ( auto j : result )
           {
-            map_coordinates above_coords = center_coords, below_coords = bottom_coords;
-            above_coords.first -= 1;
-            below_coords.first += 1;
-            if (candidate = get_jewel_in_vicinity_with_type(above_coords, center->type(), { center_coords } )) 
-            // we found a candidate for swapping with the jewel above the subgroup
-            {
-              result.insert(result.end(), map[above_coords.first][above_coords.second].get());
-              result.insert(result.end(), candidate);
-            }
-            else if (candidate = get_jewel_in_vicinity_with_type(below_coords, center->type(), { bottom_coords }))
-            // we found a candidate for swapping with the jewel below the subgroup
-            {
-              result.insert(result.end(), map[below_coords.first][below_coords.second].get());
-              result.insert(result.end(), candidate);
-            }
+            auto m = make_map_coordinates_from_jewel(j);
+            std::cout << " { .col " <<  (int) m.first << " .lin " << (int) m.second << " } ";
           }
-          else if (right)
-          // We are dealing with a horizontal subgroup, center being the left-most jewel and,
-          {
-            map_coordinates one_left_coords = center_coords, one_right_coords = right_coords;
-            one_left_coords.second -= 1;
-            one_right_coords.first += 1;
-            if (candidate = get_jewel_in_vicinity_with_type(one_left_coords, center->type(), { center_coords })) 
-            // we found a candidate for swapping with the jewel above the subgroup
-            {
-              result.insert(result.end(), map[one_left_coords.first][one_left_coords.second].get());
-              result.insert(result.end(), candidate);
-            }
-            else if (candidate = get_jewel_in_vicinity_with_type(one_right_coords, center->type(), { right_coords } ))
-            // we found a candidate for swapping with the jewel below the subgroup
-            {
-              result.insert(result.end(), map[one_right_coords.first][one_right_coords.second].get());
-              result.insert(result.end(), candidate);
-            }
-          }
-          else 
-          {
-
-          }
+          std::cout << " } " << std::endl;
           return result;
         }
 
@@ -502,83 +506,89 @@ protected:
          // @arg lin the lin
          // @return a vector with the jewels to collapse
          // @note this is an auxiliary method to determine which jewels should collapse
-				std::vector< jewel * > make_collapsing_group_from(int col, int lin)
-				{
-					std::array < jewel *, 8 > subgroup {};
-					std::vector < jewel * > group{}, hint{};
+        std::vector< jewel * > make_collapsing_group_from(int col, int lin)
+        {
+
+          std::array < jewel *, 8 > subgroup {};
+          std::vector < jewel * > group{};
+          std::list< jewel *> hint{};
           assert(col < 8 &&  lin < 8);
-					if (map[col][lin]->has_collapsed() || map[col][lin]->is_collapsing() || map[col][lin]->is_moving())
-						return group;
+          if (map[col][lin]->has_collapsed() || map[col][lin]->is_collapsing() || map[col][lin]->is_moving())
+            return group;
 
 
-					int pos = 0, top_most_subgroup_element = 0, bottom_most_subgroup_element = 0;
-					for ( int coln = col - 1;
+          int pos = 0, top_most_subgroup_element = 0, bottom_most_subgroup_element = 0;
+          for ( int coln = col - 1;
                 coln >= 0 && 
                 !map[coln][lin]->has_collapsed() && !map[coln][lin]->is_collapsing() && !map[coln][lin]->is_moving() && 
                 map[coln][lin]->type() == map[col][lin]->type();
-						    coln--, pos++, top_most_subgroup_element++)
+                coln--, pos++, top_most_subgroup_element++)
           {
-						subgroup[pos] = map[coln][lin].get();
+            subgroup[pos] = map[coln][lin].get();
           }
 
-					for ( int coln = col + 1;
-						    coln < 8 && 
+          for ( int coln = col + 1;
+                coln < 8 && 
                 !map[coln][lin]->has_collapsed() && !map[coln][lin]->is_collapsing() && !map[coln][lin]->is_moving() && 
                 map[coln][lin]->type() == map[col][lin]->type();
-						    coln++, pos++, bottom_most_subgroup_element++) 
+                coln++, pos++, bottom_most_subgroup_element++) 
           {
-						subgroup[pos] = map[coln][lin].get();
+            subgroup[pos] = map[coln][lin].get();
           }
-
-					if (pos >= 2) // yey, a group
+ 
+          if (pos >= 2) // yey, a group
           {
-						group.insert(group.begin(), subgroup.begin(), subgroup.begin() + pos);
+            group.insert(group.begin(), subgroup.begin(), subgroup.begin() + pos);
           }
-          else if (pos)
+          else if (pos && hints.empty())
           {
             auto subgroup_copy = std::vector< jewel *>{ map[col][lin].get(), subgroup[0] };
-//            hints = make_hints_from_subgroup(subgroup_copy);
+            hint = make_hints_from_horizontal_subgroup(subgroup_copy);
           }
-          else 
+          else if (hints.empty())
           {
-//            hints = make_hints_from_jewel( map[col][lin].get() );
+            hint = make_hints_from_jewel( map[col][lin].get() );
           }
 
-					pos = 0;
-					for ( int linn = lin - 1;
-						    linn >= 0 && 
+          pos = 0;
+          for ( int linn = lin - 1;
+                linn >= 0 && 
                 !map[col][linn]->has_collapsed() && !map[col][linn]->is_collapsing() && !map[col][linn]->is_moving() && 
                 map[col][linn]->type() == map[col][lin]->type();
-						    linn--, pos++)
+                linn--, pos++)
           {
-					  subgroup[pos] = (map[col][linn]).get();
+            subgroup[pos] = (map[col][linn]).get();
           }
 
-					for ( int linn = lin + 1;
-						    linn < 8 && 
-                !map[col][linn]->has_collapsed() && !map[col][linn]->is_collapsing() && !map[col][linn]->has_arrived() && 
+          for ( int linn = lin + 1;
+                linn < 8 && 
+                !map[col][linn]->has_collapsed() && !map[col][linn]->is_collapsing() && !map[col][linn]->is_moving() && 
                 map[col][linn]->type() == map[col][lin]->type();
-						    linn++, pos++)
+                linn++, pos++)
           {
-						subgroup[pos] = (map[col][linn]).get();
+            subgroup[pos] = (map[col][linn]).get();
           }
 
-					if (pos + 1 >= 3)
+          if (pos >= 2) // yey, a group
           {
-						group.insert(group.begin(), subgroup.begin(), subgroup.begin() + pos);
-            if (hints.empty())
-            {
-              auto subgroup_copy = std::vector< jewel * >( subgroup.begin(), subgroup.end());
-              subgroup_copy.insert(subgroup_copy.end(), map[col][lin].get());
-              hints = make_hints_from_subgroup(subgroup_copy);
-            }
+            group.insert(group.begin(), subgroup.begin(), subgroup.begin() + pos);
           }
-
-					if (group.size() >= 2)
+          else if (pos && hints.empty())
           {
-						group.insert(group.begin(), map[col][lin].get());
-            hints.clear();
+            auto subgroup_copy = std::vector< jewel *>{ map[col][lin].get(), subgroup[0] };
+            hint = make_hints_from_vertical_subgroup(subgroup_copy);
           }
+          else if (hints.empty())
+          {
+            hints = make_hints_from_jewel( map[col][lin].get() );
+          }
+          
+          if (group.size() >= 2)
+          {
+            group.insert(group.begin(), map[col][lin].get());
+            hint.clear();
+          }
+          hints.insert(hints.end(), hint.begin(), hint.end());
 
           { // invariants assert
             for ( auto&& j : group )
@@ -588,60 +598,61 @@ protected:
               assert(j->has_arrived());
               assert(!j->has_collapsed());
             }
+
           }
-					return group;
-				}
+          return group;
+        }
 
         // Initiates the collapsing sequence for all the groups on the map.
         // @note calls the collapse_jewel for every jewel on the group
         void collapse_existing_groups()
-				{
-					std::vector< std::vector< jewel * > > groups{};
-					std::set< jewel * > seen{};
+        {
+          std::vector< std::vector< jewel * > > groups{};
+          std::set< jewel * > seen{};
 
-					for (int lin = 0; lin < 8; lin++)
-					{
-						for (int col = 0; col < 8; col++)
-						{
-							std::queue< jewel * > next{};
-							std::vector< jewel* > group{}, current_group{};
+          for (int lin = 0; lin < 8; lin++)
+          {
+            for (int col = 0; col < 8; col++)
+            {
+              std::queue< jewel * > next{};
+              std::vector< jewel* > group{}, current_group{};
 
-							group.reserve(3);
-							current_group.reserve(3);
+              group.reserve(3);
+              current_group.reserve(3);
 
-							if (seen.find(map[col][lin].get()) != seen.end())
-								continue;
+              if (seen.find(map[col][lin].get()) != seen.end())
+                continue;
 
-							next.emplace(map[col][lin].get());
-							do
-							{
-								auto curr = next.front();
-								next.pop();
+              next.emplace(map[col][lin].get());
+              do
+              {
+                auto curr = next.front();
+                next.pop();
 
                 if (curr->is_moving() || curr->is_collapsing() || curr->has_collapsed())
                   continue;
 
                 auto curr_coords = make_map_coordinates_from_jewel(curr);
-                assert(curr_coords.first >= 0 && curr_coords.first <= 7);
-                assert(curr_coords.second >= 0 && curr_coords.second <= 7); 
-								current_group = make_collapsing_group_from(curr_coords.first, curr_coords.second);
-								if (current_group.size() > group.size())
-									group = current_group;
-								for (auto&& jewel : current_group)
-								{
-									if (seen.find(jewel) == seen.end())
-									{
-										next.emplace(jewel);
-									}
-								}
-                seen.emplace(map[col][lin].get());
-							} while (!next.empty());
+                assert(curr_coords.first >= 0 && curr_coords.first <= COLUMNS);
+                assert(curr_coords.second >= 0 && curr_coords.second <= LINES); 
+                current_group = make_collapsing_group_from(curr_coords.first, curr_coords.second);
+                if (current_group.size() > group.size())
+                  group = current_group;
+                for (auto&& jewel : current_group)
+                {
+                  if (seen.find(jewel) == seen.end())
+                  {
+                    next.emplace(jewel);
+                  }
+                }
+                seen.emplace(curr);
+              } while (!next.empty());
 
-							if (group.size() > 0)
-								groups.emplace_back(group);
-						}
-					}
-				
+              if (group.size() > 0)
+                groups.emplace_back(group);
+            }
+          }
+        
            
           auto increment = 0;
           for (auto&& group : groups) 
@@ -657,48 +668,59 @@ protected:
           }
           if (increment)
           {
+            for (auto j : hints)
+              if (!(j->is_collapsing() || j->has_collapsed()))
+                j->animation(jewel_animation_type::IDLE);
+            hints.clear();
             score(increment);
           }
-				}
+          /*
+          else 
+          {
+            for (auto j : hints)
+              if (!(j->is_collapsing() || j->has_collapsed()))
+                j->animation(jewel_animation_type::GLOWING);
+          }
+          */
+        }
 
 public:
-				grid(const std::string& spritesheet, const SDL_Rect& screen):
-					  sheet{ spritesheet }
-					, screen{ screen }
-					, map{}
-					//, columns_with_free_slots{}
-					, selected{2}
-					, moving{}
-					, collapsing{}
+        grid(const std::string& spritesheet, const SDL_Rect& screen):
+            sheet{ spritesheet }
+          , screen{ screen }
+          , map{}
+          //, columns_with_free_slots{}
+          , selected{2}
+          , moving{}
+          , collapsing{}
           , _score{0}
           , event_listeners {}
-				{
-					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-					assert(0 <= screen.x && screen.x <= 640);
-					assert(0 <= screen.y && screen.y <= 480);
-					assert(screen.h == JEWEL_WIDTH * 8);
-					assert(screen.w == JEWEL_HEIGHT * 8);
+        {
+          std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+          assert(0 <= screen.x && screen.x <= 640);
+          assert(0 <= screen.y && screen.y <= 480);
+          assert(screen.h == JEWEL_WIDTH * 8);
+          assert(screen.w == JEWEL_HEIGHT * 8);
 
-					uint32_t subgroups_to_create = 5;
+          uint32_t subgroups_to_create = 5;
 
           std::cout << fn << "map was generated and resides at <" << screen.x << ", " << screen.y << ">."<< std::endl;
-					map_generator_t::make_map(map, (uint32_t)5, screen.x, screen.y);
+          random_generator::make_map(map, (uint32_t)5, screen.x, screen.y);
 
           yage::input::mouse& m = yage::input::mouse::instance();
-				}
+        }
 
-				virtual ~grid() {}
+        virtual ~grid() {}
 
-				operator SDL_Rect&()
-				{
-					return screen;
-				}
+        operator SDL_Rect&()
+        {
+          return screen;
+        }
 
-				void on_frame()
-				{
+        void on_frame()
+        {
 
-					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-          
+          std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
           { // assertions, to be removed
             auto collapsing_it = collapsing.begin();
             while (collapsing_it != collapsing.end()) 
@@ -709,11 +731,9 @@ public:
                   ((*collapsing_it)->has_arrived() && !(*collapsing_it)->is_moving()));
               collapsing_it++;
             }
-            
             auto moving_it = moving.begin();
             while (moving_it != moving.end())
             {
-           
               // a moving jewel has, by definition, not arrived and cannot have collapsed nor being in process of collapsing
               assert( 
                 ((*moving_it)->is_moving() && !(*moving_it)->has_arrived()) && 
@@ -723,71 +743,75 @@ public:
           }
 
 
-					{
+          {
             invariant();
-						// iterate through the store, ticking and rendering every jewel
-						for (int lin = 0; lin < LINES; lin++)
+            // iterate through the store, ticking and rendering every jewel
+            for (int lin = 0; lin < LINES; lin++)
             {
-							for (int col = 0; col < COLUMNS; col++) 
-							{
-								map[lin][col]->tick();
-								map[lin][col]->on_frame();
-							}
+              for (int col = 0; col < COLUMNS; col++) 
+              {
+                map[lin][col]->tick();
+                map[lin][col]->on_frame();
+              }
             }
             invariant();
-					}
-					
+          }
 
-					
-					{
+          {
             invariant();
-						// iterate through the moving collection, removing those who reached their destination
-						auto&& jewel_it = moving.begin();
-						while (moving.end() != jewel_it)
-						{
+            // iterate through the moving collection, removing those who reached their destination
+            auto&& jewel_it = moving.begin();
+            while (moving.end() != jewel_it)
+            {
               jewel* j = *jewel_it;
               if (!j->has_arrived())
-							{
-								jewel_it++;
-								continue;
-							}
+              {
+                jewel_it++;
+                continue;
+              }
               auto coords = make_map_coordinates_from_jewel(j);
-              assert(!j->has_arrived() || ((0 <= coords.first && coords.first <= 7) && (0 <= coords.second && coords.second <= 7)));
+              assert(!j->has_arrived() || ((0 <= coords.first && coords.first <= COLUMNS) && (0 <= coords.second && coords.second <= LINES)));
               assert(j == map[coords.first][coords.second].get());
               j->vel(0);
-							jewel_it = moving.erase(jewel_it);
-						}
+              jewel_it = moving.erase(jewel_it);
+            }
 
             invariant();
-					}
+          }
 
 
-					{
+          {
             invariant();
-						// iterate through the collapsing collection, removing already collapsed
-						auto&& jewel_it = collapsing.begin();
-						while (jewel_it != collapsing.end())
-						{
+            // iterate through the collapsing collection, removing already collapsed
+            auto&& jewel_it = collapsing.begin();
+            while (jewel_it != collapsing.end())
+            {
               
-							if (!(*jewel_it)->has_collapsed())
-							{
-								jewel_it++;
-								continue;
-							}
+              if (!(*jewel_it)->has_collapsed())
+              {
+                jewel_it++;
+                continue;
+              }
 
               auto coords = make_map_coordinates_from_jewel((*jewel_it)); 
-    					//columns_with_free_slots[coords.first].push(coords.second);
-              assert(coords.first >= 0 && coords.first <= 7);
-              assert(coords.second >= 0 && coords.second <= 7); 
+              //columns_with_free_slots[coords.first].push(coords.second);
+              assert(coords.first >= 0 && coords.first <= COLUMNS);
+              assert(coords.second >= 0 && coords.second <= LINES); 
 
-							jewel_it = collapsing.erase(jewel_it);
-						}
+              jewel_it = collapsing.erase(jewel_it);
+            }
             invariant();
-					}
+          }
           
           if (collapsing.size() == 0  && moving.size() == 0)
           {
             collapse_existing_groups();
+            if (hints.empty())
+            {
+              for ( auto listener : event_listeners )
+                listener->on_game_over();
+            }
+              
           }
 
           { 
@@ -826,36 +850,36 @@ public:
           }
           
           {
-						map_generator_t::generate_jewels_in_columns_with_empty_spaces(map, moving, screen.x, screen.y);
-					}
+            random_generator::generate_jewels_in_columns_with_empty_spaces(map, moving, screen.x, screen.y);
+          }
 
 
           {
-						// deal with the selected jewels, if any
+            // deal with the selected jewels, if any
             std::shared_ptr< jewel > first{}, second{};
-						if ((first = selected[0].lock()) && (second = selected[1].lock()))
-						{
+            if ((first = selected[0].lock()) && (second = selected[1].lock()))
+            {
               if ( first->has_arrived() && second->has_arrived() ) 
               {
-							  if ( !first->is_collapsing() && !second->is_collapsing() )  
-							  {
+                if ( !first->is_collapsing() && !second->is_collapsing() )  
+                {
                   auto first_coords = make_map_coordinates_from_jewel(first.get());
                   auto second_coords = make_map_coordinates_from_jewel(second.get());
 
-                  assert(first_coords.first >= 0 && first_coords.first <= 7);
-                  assert(first_coords.first >= 0 && first_coords.first <= 7);
-                  assert(second_coords.second >= 0 && second_coords.second <= 7); 
-                  assert(second_coords.second >= 0 && second_coords.second <= 7); 
-								  swap(first_coords,second_coords);
+                  assert(first_coords.first >= 0 && first_coords.first <= COLUMNS);
+                  assert(first_coords.first >= 0 && first_coords.first <= COLUMNS);
+                  assert(second_coords.second >= 0 && second_coords.second <= LINES); 
+                  assert(second_coords.second >= 0 && second_coords.second <= LINES); 
+                  swap(first_coords,second_coords);
                   selected[0].reset();
                   selected[1].reset();
-							  }
+                }
                 else
                 {
                   selected[0].reset();
                   selected[1].reset();
                 }
-						 }
+             }
           }
          /*   else if (selected[0].expired())
             {
@@ -863,7 +887,7 @@ public:
               selected[1].reset();
             }
             */
-					}
+          }
           
           
 
@@ -889,99 +913,99 @@ public:
         }
 //        std::cout << std::endl;
 
-				}
+        }
 
-				void on_dragged(const SDL_MouseButtonEvent& b)
-				{
-					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
-					std::cout << fn << "enter. ";
-					if (moving.size() >= 0 || collapsing.size() >= 0)
-					{
-						std::cout << fn << "exit";
-						return;
-					}
-					
+        void on_dragged(const SDL_MouseButtonEvent& b)
+        {
+          std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+          std::cout << fn << "enter. ";
+          if (moving.size() >= 0 || collapsing.size() >= 0)
+          {
+            std::cout << fn << "exit";
+            return;
+          }
+          
           auto&& jewel_coordinates = make_map_coordinates_from_screen(b.x, b.y);
-          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first <= 7) && 
-                (0 <= jewel_coordinates.second && jewel_coordinates.second <= 7)))
+          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first <= COLUMNS) && 
+                (0 <= jewel_coordinates.second && jewel_coordinates.second <= LINES)))
           {
             std::cout << fn << "received a drag event from outside the grid.\n";
             return ;
           }
-					auto column = jewel_coordinates.first;
-					auto line = jewel_coordinates.second;
-					std::cout << fn << "dragged <" << (int)column << ", " << (int)line << ">\n";
+          auto column = jewel_coordinates.first;
+          auto line = jewel_coordinates.second;
+          std::cout << fn << "dragged <" << (int)column << ", " << (int)line << ">\n";
 
-					if (selected[0].use_count() <= 0)
-					{
+          if (selected[0].use_count() <= 0)
+          {
             std::cout << fn << "use_count is " << selected[0].use_count()<< "\n";
-						std::cout << fn << "setting first moving piece.\n";
+            std::cout << fn << "setting first moving piece.\n";
             std::weak_ptr< jewel > first{ map[column][line] };
             selected[0].swap(first);
-					}
-					else if (map[column][line] == selected[0].lock())
+          }
+          else if (map[column][line] == selected[0].lock())
           {
-						std::cout << fn << "unsetting first moving piece.\n";
-						selected[0].reset();
+            std::cout << fn << "unsetting first moving piece.\n";
+            selected[0].reset();
           }
           else
-					{
-						std::cout << fn << "setting second moving piece.\n";
-						selected[1] = map[column][line];
+          {
+            std::cout << fn << "setting second moving piece.\n";
+            selected[1] = map[column][line];
 
             swap(selected[0].lock().get(), selected[1].lock().get());
-					}
+          }
           std::cout << "exit." << std::endl;;
-				}
+        }
 
-				void on_clicked(const SDL_MouseButtonEvent& b)
-				{
+        void on_clicked(const SDL_MouseButtonEvent& b)
+        {
           std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
           std::cout << fn << "enter" << std::endl;
           yage::input::mouse& m = yage::input::mouse::instance();
 
 
-					if (moving.size() > 0 || collapsing.size() > 0)
-					{
-						return;
-					}
+          if (moving.size() > 0 || collapsing.size() > 0)
+          {
+            return;
+          }
 
           auto&& jewel_coordinates = make_map_coordinates_from_screen(b.x, b.y);
-          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first <= 7) && 
-                (0 <= jewel_coordinates.second && jewel_coordinates.second <= 7)))
+          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first <= COLUMNS) && 
+                (0 <= jewel_coordinates.second && jewel_coordinates.second <= LINES)))
           {
             std::cout << fn << "received a click from outside the grid." << std::endl;
             return ;
           }
-					auto column = jewel_coordinates.first;
-					auto line = jewel_coordinates.second;
-					std::cout << fn << "clicked on <" << (int)column << ", " << (int)line << ">\n";
+          auto column = jewel_coordinates.first;
+          auto line = jewel_coordinates.second;
+          std::cout << fn << "clicked on <" << (int)column << ", " << (int)line << ">\n";
 
           switch(b.type)
           {
             case SDL_MOUSEBUTTONDOWN:
               if (selected[0].use_count() <= 0)  
-					    {
-						    std::cout << fn << "setting first moving piece.";
+              {
+                std::cout << fn << "setting first moving piece.";
                 std::weak_ptr< jewel > first{ map[column][line] };
                 selected[0].swap(first);
-					    }
+              }
               else if (map[column][line] == selected[0].lock())
               {
-						    std::cout << fn << "unsetting first moving piece.";
-						    selected[0].reset();
+                std::cout << fn << "unsetting first moving piece.";
+                selected[0].reset();
               }
               else  // selecting second
               {
-						    std::cout << fn << "setting second moving piece.";
-						    selected[1] = map[column][line];
+                std::cout << fn << "setting second moving piece.";
+                selected[1] = map[column][line];
               }
               break;
             case   SDL_MOUSEBUTTONUP:
               if (selected[0].use_count() > 0 && !(map[column][line] == selected[0].lock()) )
               {
-						    std::cout << fn << "setting second moving piece.";
-						    selected[1] = map[column][line];
+                std::cout << fn << "setting second moving piece.";
+                selected[1] = map[column][line];
               }
 
               break;
@@ -989,40 +1013,40 @@ public:
           if (selected[0].lock() && selected[1].lock())  
             swap(selected[0].lock().get(), selected[1].lock().get());
 /*
-					if (selected[0].use_count() <= 0)
-					{
+          if (selected[0].use_count() <= 0)
+          {
             std::cout << fn << "use_count is " << selected[0].use_count()<< "\n";
-						std::cout << fn << "setting first moving piece.";
+            std::cout << fn << "setting first moving piece.";
             std::weak_ptr< jewel > first{ map[column][line] };
             selected[0].swap(first);
-					}
-					else if (map[column][line] == selected[0].lock())
+          }
+          else if (map[column][line] == selected[0].lock())
           {
-						std::cout << fn << "unsetting first moving piece.";
-						selected[0].reset();
+            std::cout << fn << "unsetting first moving piece.";
+            selected[0].reset();
           }
           else
-					{
-						std::cout << fn << "setting second moving piece.";
-						selected[1] = map[column][line];
+          {
+            std::cout << fn << "setting second moving piece.";
+            selected[1] = map[column][line];
 
             swap(selected[0].lock().get(), selected[1].lock().get());
-					}
+          }
 */
-					std::cout << std::endl;
-				}
+          std::cout << std::endl;
+        }
 
-				void lose_focus()
-				{
-					std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
+        void lose_focus()
+        {
+          std::string fn{ std::string(__PRETTY_FUNCTION__) + ": " };
 
           selected[0].reset();
           selected[1].reset();
-				}
+        }
        
         /// Swaps two adjacent jewels,
-				/// causes the two jewels to change places in logical map and acelerate towards the each others' location.
-				void swap(const map_coordinates& f, const map_coordinates& s)
+        /// causes the two jewels to change places in logical map and acelerate towards the each others' location.
+        void swap(const map_coordinates& f, const map_coordinates& s)
         {
           std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
           auto col_distance = std::max(f.first,s.first) - std::min(f.first,s.first);
@@ -1034,7 +1058,7 @@ public:
           }
           auto fi = map[ f.first ][ f.second ];
           auto se = map[ s.first ][ s.second ];
-					auto e = fi;
+          auto e = fi;
 
           map[ f.first ][ f.second ] = se;
           map[ s.first ][ s.second ] = fi;
@@ -1043,7 +1067,7 @@ public:
           move_jewel(se.get(), f);
 
         }
-				
+        
         void swap(const uint8_t& f_col, const uint8_t& f_lin, const uint8_t& s_col, const uint8_t& s_lin)
         {
           std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
@@ -1056,19 +1080,19 @@ public:
           auto first = make_map_coordinates_from_col_and_lin(f_col, f_lin);
           auto second = make_map_coordinates_from_col_and_lin(s_col, s_lin);
 
-          assert(first.first >= 0 && first.first <= 7);
-          assert(first.second >= 0 && first.second <= 7); 
+          assert(first.first >= 0 && first.first <= COLUMNS);
+          assert(first.second >= 0 && first.second <= LINES); 
           
           
-          assert(second.first >= 0 && second.first <= 7);
-          assert(second.second >= 0 && second.second <= 7); 
+          assert(second.first >= 0 && second.first <= COLUMNS);
+          assert(second.second >= 0 && second.second <= LINES); 
           
           swap(first, second);
-				}
+        }
 
       
      
-		
+    
         void swap(jewel* first, jewel* second)
         {
           swap(make_map_coordinates_from_jewel(first), make_map_coordinates_from_jewel(second));
@@ -1091,12 +1115,21 @@ public:
           event_listeners.remove(listener);
         }
 
-			};
+        void on_hint()
+        {
+          if (collapsing.size() > 0 && moving.size() > 0)
+            return ;
+          collapse_existing_groups();
+          for (auto j : hints)
+            j->animation( jewel_animation_type::GLOWING );
+        }
+
+      };
 
 
-		}
-		using namespace interface1;
-	}
+    }
+    using namespace interface1;
+  }
 }
 
 #endif

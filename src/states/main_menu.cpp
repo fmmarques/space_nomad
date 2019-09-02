@@ -19,8 +19,14 @@ namespace interface1 {
 
 main_menu::main_menu():
   yage::engine::game_state()
-,  options{ "New game", "Continue", "Exit" }
-,  selected_option{option::UNDEFINED}
+, options{ "New game", "Continue", "Exit" }
+, selected_option{option::UNDEFINED}
+, title {
+    yage::graphics::font_manager::instance().load("assets/pac-font.ttf",32),
+    "BeJeWeLed",
+    (SDL_Color){ .r = 128, 128, 128, 0 },
+    32
+  }
 ,  background{ yage::graphics::texture_manager::instance().load("assets/bejeweled.background.2.jpg") } //main_menu.background.1.jpg") }
 ,  newgame {
    yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 18),
@@ -38,14 +44,22 @@ main_menu::main_menu():
       SDL_PushEvent(&q);
     }
    }
-,  newgame_r { .x=640/2 - newgame.w()/2, 
-                  480/2 - newgame.h()/2 - 2 - newgame.h()/2,
-                  newgame.w(),
-                  newgame.h() }
-,  quitgame_r { .x=640/2 - newgame.w()/2, 
-                   480/2 - newgame.h()/2 - 2 + newgame.h()*2,
-                   newgame.w(),
-                   newgame.h()}
+,  title_r {
+    .x = yage::graphics::graphics_manager::instance().get_window().w() / 2 - title.w()/2,
+         yage::graphics::graphics_manager::instance().get_window().h() / 2 - title.h()*3,
+         title.w(),
+         title.h()
+   }
+,  newgame_r { 
+    .x=yage::graphics::graphics_manager::instance().get_window().w()/2 - newgame.w(), 
+       yage::graphics::graphics_manager::instance().get_window().h()/2 - newgame.h(),
+       newgame.w()*2,
+       newgame.h() }
+,  quitgame_r { 
+    .x=yage::graphics::graphics_manager::instance().get_window().w()/2 - newgame.w(), 
+       yage::graphics::graphics_manager::instance().get_window().h()/2 + newgame.h(),
+       newgame.w()*2,
+       newgame.h() }
  
 {
 
@@ -91,8 +105,10 @@ void main_menu::on_frame()
 {
   auto&& r = yage::graphics::graphics_manager::instance().get_window();
  SDL_RenderCopy(r, background, NULL, r);
+  title.render(&title_r);
   newgame.render(&newgame_r);
   quitgame.render(&quitgame_r);
+
 }
 /*
 void main_menu::on_keycode_pressed(const SDL_Keysym& keysym) 
@@ -110,8 +126,6 @@ void main_menu::on_keycode_released(const SDL_Keysym& keysym)
 */
 void main_menu::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
-
-  SDL_Rect m_click { button.x, button.y, 1, 1 };
   if ( newgame_r.x <= button.x && newgame_r.x + newgame_r.w >= button.x && 
        newgame_r.y <= button.y && newgame_r.y + newgame_r.h >= button.y   )
     newgame.on_click();
@@ -122,12 +136,10 @@ void main_menu::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 
 void main_menu::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 {
-  std::cout << "main_menu::on_mouse_button_up: button: " << std::to_string(button.button) << "; state: " << std::to_string(button.state) << "; clicks: " << std::to_string(button.clicks) << "; <x,y>=<" << button.x << "," <<button.y << std::endl;
 }
 
 void main_menu::on_mouse_movement(const SDL_MouseMotionEvent& motion)
 {
-  std::cout << "main_menu::on_mouse_movement: motion: <" << motion.x << ", " << motion.y << ">" << std::endl; 
 }
 
 

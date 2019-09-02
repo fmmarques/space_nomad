@@ -21,6 +21,7 @@ public:
   score(int x, int y);
 
   void on_score_change(int score);
+  void on_game_over() {};
   void on_frame();
 };
 

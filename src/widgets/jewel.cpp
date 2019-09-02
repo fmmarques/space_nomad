@@ -164,6 +164,11 @@ void jewel::tick()
     case jewel_animation_type::COLLAPSING:
       _current.w = ((_current.w > 0) ? _current.w - 1: 0);
 		  _current.h = ((_current.h > 0) ? _current.h - 1: 0);
+      _current.x = ((_current.w % 2) ? _current.x + 1: _current.x);
+      _destination.x = _current.x;
+      _current.y = ((_current.h % 2) ? _current.y + 1: _current.y);
+      _destination.y = _current.y;
+
       break;
     default:
       ;
@@ -231,6 +236,14 @@ bool jewel::has_collapsed() const
   return r;
 }
 
+bool jewel::is_collapsable() const
+{
+  bool r = false;
+  invariant();
+  r = !has_collapsed() && !is_collapsing() && has_arrived();
+  invariant();
+  return r;
+}
 
 } // interface1
 } // widgets

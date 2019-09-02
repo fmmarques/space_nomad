@@ -1,6 +1,5 @@
 #include <iostream>
 
-
 #include <yage/input/input_manager.hpp>
 #include <yage/graphics/texture_manager.hpp>
 #include <yage/graphics/graphics_manager.hpp>
@@ -15,11 +14,50 @@ namespace interface1 {
 
 base_game::base_game():
   background{ yage::graphics::texture_manager::instance().load("assets/bejeweled.background.1.jpg") }
-, score{ 640/2 - 32*4,480/2+32*2 } 
-, grid("assets/grid.background.png", (SDL_Rect){
-    .x=640/2 - 32*4, 480/2-32*6, .w=32*8, .h=32*8})
+, score{ 
+    yage::graphics::graphics_manager::instance().get_window().w()/2 - bejeweled::widgets::grid::JEWEL_WIDTH * 3,
+    yage::graphics::graphics_manager::instance().get_window().h()/2 - bejeweled::widgets::grid::JEWEL_HEIGHT * 5 }
+, grid(
+    "assets/grid.background.png", 
+    (SDL_Rect){
+      .x = yage::graphics::graphics_manager::instance().get_window().w()/2 - bejeweled::widgets::grid::JEWEL_WIDTH * 3, 
+           yage::graphics::graphics_manager::instance().get_window().h()/2 - bejeweled::widgets::grid::JEWEL_HEIGHT * 4, 
+           bejeweled::widgets::grid::JEWEL_WIDTH * bejeweled::widgets::grid::COLUMNS, 
+           bejeweled::widgets::grid::JEWEL_HEIGHT * bejeweled::widgets::grid::LINES })
+, hint(
+    yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 32),
+    "Help me!",
+    32,
+    [this]{ std::cout << "hint me!" << std::endl; this->grid.on_hint(); },
+    (SDL_Color){ 0xFF, 0xFF, 0xFF, 0x0 },
+    (SDL_Color){ 0xFF, 0x0, 0x0, 0x00 }
+  )
+, hint_r { 
+    .x = yage::graphics::graphics_manager::instance().get_window().w()/2 - bejeweled::widgets::grid::JEWEL_WIDTH * (9), 
+         yage::graphics::graphics_manager::instance().get_window().h()/2 - bejeweled::widgets::grid::JEWEL_HEIGHT,
+         bejeweled::widgets::grid::JEWEL_WIDTH * 5,
+         bejeweled::widgets::grid::JEWEL_HEIGHT * 2 }
+, gameover_widget_r { 
+    .x = 10,
+         10, 
+         yage::graphics::graphics_manager::instance().get_window().w() - 10, 
+         yage::graphics::graphics_manager::instance().get_window().h() - 10 ,
+         }
+, gameover{ false }
+, gameover_widget{ 
+    yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 52),
+    "Game over",
+    52,
+    [this]{ 
+      std::cout << "goto main menu" << std::endl;
+      bejeweled::engine::instance().pop();
+    },
+    (SDL_Color){ 0xFF, 0xFF, 0xFF, 0x0 },
+    (SDL_Color){ 0xFF, 0x0, 0x0, 0x00 }
+  }
 {
   grid.subscribe((grid_event_listener*)&score);
+  grid.subscribe((grid_event_listener*)this);
 }
 
 base_game::~base_game ()
@@ -69,11 +107,17 @@ void base_game::on_interrupt()
 void base_game::on_frame()
 {
   auto&& r = yage::graphics::graphics_manager::instance().get_window();
-
-  SDL_Rect rect { .x=0, 0, 100, 18 };
-  SDL_RenderCopy(r, background, NULL, r);
-  score.on_frame();
-  grid.on_frame();
+  if (!gameover)
+  {
+    SDL_RenderCopy(r, background, NULL, r);
+    score.on_frame();
+    grid.on_frame();
+    hint.render(&hint_r);
+  }
+  else
+  {
+    gameover_widget.render(&gameover_widget_r);
+  }
 }
 
 void base_game::on_keycode_pressed(const SDL_Keysym& keysym) 
@@ -102,15 +146,29 @@ void base_game::on_mouse_button_down(const SDL_MouseButtonEvent& button)
   std::cout << fn << "button: " << std::to_string(button.button) << "; state: " << std::to_string(button.state) << "; clicks: " << std::to_string(button.clicks) << "; <x,y>=<" << button.x << "," <<button.y << ">"  << std::endl;
 
   auto&& m = mouse::instance();
-  if (m.hovers(grid)) 
+  std::cout << "is game over: " << std::boolalpha << gameover;
+  std::cout << "hovers: " << m.hovers(gameover_widget_r);
+  if (gameover &&m.hovers(gameover_widget_r))
   {
-      grid.on_clicked(button);
-  }
-  else
-  {
-    grid.lose_focus();
+    gameover_widget.on_click();
+    return;
   }
 
+  if ( m.hovers(grid)) 
+  {
+    grid.on_clicked(button);
+    return;
+  }
+  grid.lose_focus();
+
+  
+  if (m.hovers(hint_r))
+  {
+    hint.on_click();
+    return;
+  }
+
+  
 }
 
 void base_game::on_mouse_button_up(const SDL_MouseButtonEvent& button)
@@ -135,6 +193,11 @@ void base_game::on_mouse_movement(const SDL_MouseMotionEvent& motion)
 {
 }
 
+void base_game::on_score_change(int new_score) {}
+void base_game::on_game_over() 
+{
+  gameover = true;
+}
 
     }
   

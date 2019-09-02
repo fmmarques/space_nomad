@@ -322,6 +322,33 @@ src/widgets/grid.cpp.s:
 	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/grid.cpp.s
 .PHONY : src/widgets/grid.cpp.s
 
+src/widgets/grid_generators.o: src/widgets/grid_generators.cpp.o
+
+.PHONY : src/widgets/grid_generators.o
+
+# target to build an object file
+src/widgets/grid_generators.cpp.o:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/grid_generators.cpp.o
+.PHONY : src/widgets/grid_generators.cpp.o
+
+src/widgets/grid_generators.i: src/widgets/grid_generators.cpp.i
+
+.PHONY : src/widgets/grid_generators.i
+
+# target to preprocess a source file
+src/widgets/grid_generators.cpp.i:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/grid_generators.cpp.i
+.PHONY : src/widgets/grid_generators.cpp.i
+
+src/widgets/grid_generators.s: src/widgets/grid_generators.cpp.s
+
+.PHONY : src/widgets/grid_generators.s
+
+# target to generate assembly for a file
+src/widgets/grid_generators.cpp.s:
+	$(MAKE) -f CMakeFiles/bejeweled.dir/build.make CMakeFiles/bejeweled.dir/src/widgets/grid_generators.cpp.s
+.PHONY : src/widgets/grid_generators.cpp.s
+
 src/widgets/jewel.o: src/widgets/jewel.cpp.o
 
 .PHONY : src/widgets/jewel.o
@@ -404,6 +431,9 @@ help:
 	@echo "... src/widgets/grid.o"
 	@echo "... src/widgets/grid.i"
 	@echo "... src/widgets/grid.s"
+	@echo "... src/widgets/grid_generators.o"
+	@echo "... src/widgets/grid_generators.i"
+	@echo "... src/widgets/grid_generators.s"
 	@echo "... src/widgets/jewel.o"
 	@echo "... src/widgets/jewel.i"
 	@echo "... src/widgets/jewel.s"

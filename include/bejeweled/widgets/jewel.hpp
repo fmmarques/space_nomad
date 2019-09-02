@@ -84,6 +84,7 @@ public:
   bool has_arrived() const;
   bool is_collapsing() const;
   bool has_collapsed() const;
+  bool is_collapsable() const;
 
   void on_frame(); 
 };

@@ -47,7 +47,7 @@ public:
     std::string fn{ std::string( __PRETTY_FUNCTION__ ) + std::string(": ") };
 
     constexpr auto TICKS_IN_SECOND = 1000;
-    constexpr auto FRAMES_PER_SECOND = 30;
+    constexpr auto FRAMES_PER_SECOND = 32;
     constexpr auto TICKS_PER_FRAME = TICKS_IN_SECOND/FRAMES_PER_SECOND;
 
 

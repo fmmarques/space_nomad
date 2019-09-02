@@ -30,9 +30,10 @@ private:
   std::list< std::string > options;
   option selected_option;
 
+  yage::widgets::label title;
   yage::graphics::texture background;
   yage::widgets::button newgame, quitgame;
-  SDL_Rect newgame_r, quitgame_r;
+  SDL_Rect title_r, newgame_r, quitgame_r;
 protected:
 
 public:
