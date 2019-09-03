@@ -806,12 +806,7 @@ public:
           if (collapsing.size() == 0  && moving.size() == 0)
           {
             collapse_existing_groups();
-            if (hints.empty())
-            {
-              for ( auto listener : event_listeners )
-                listener->on_game_over();
-            }
-              
+                      
           }
 
           { 
@@ -891,6 +886,16 @@ public:
           
           
 
+         if (collapsing.size() == 0  && moving.size() == 0)
+          {
+            collapse_existing_groups();
+            if (collapsing.size() == 0 && hints.empty())
+            {
+              for ( auto listener : event_listeners )
+                listener->on_game_over();
+            }
+              
+          }
 
 //        std::cout << "logical map\n";
         for (int lin = 0; lin < 8; lin++)
