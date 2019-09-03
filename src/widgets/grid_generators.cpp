@@ -6,11 +6,11 @@ namespace widgets {
 namespace interface1 {
 
 
-void random_generator::fill_column( std::shared_ptr<jewel> map[8][8], std::list<  jewel * >& moving, int column, int x, int y)
+void random_generator::fill_column( std::shared_ptr<jewel> map[COLUMNS][LINES], std::list<  jewel * >& moving, int column, int x, int y)
 {
   int falling_jewels = 0;
   int collapsed_jewels = 0;
-  for (auto line = 0; line < 8; line++)
+  for (auto line = 0; line < LINES; line++)
   {
     if (!map[column][line]->has_collapsed())
     {

@@ -161,8 +161,8 @@ protected:
         void move_jewel(jewel* j, const map_coordinates& map_destination)
         {
           assert(j != nullptr);
-          assert(0 <= map_destination.first && map_destination.first <= COLUMNS);
-          assert(0 <= map_destination.second && map_destination.second <= LINES);
+          assert(0 <= map_destination.first && map_destination.first < COLUMNS);
+          assert(0 <= map_destination.second && map_destination.second < LINES);
 
           auto&& map_origin = make_map_coordinates_from_jewel(j);
           if (map_origin.first == -1 || map_origin.second == -1)
@@ -223,7 +223,7 @@ protected:
             c.first +=1;
           }
 
-          if (!result && (col + 1 <= COLUMNS) && map[col+1][lin]->type() == t && map[col + 1][lin]->is_collapsable())
+          if (!result && (col + 1 < COLUMNS) && map[col+1][lin]->type() == t && map[col + 1][lin]->is_collapsable())
           {
             c.first += 1;
             if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
@@ -239,7 +239,7 @@ protected:
             c.second += 1;
           }
           
-          if (!result && (lin + 1 <= COLUMNS) && map[col][lin+1]->type() == t && map[col][lin+1]->is_collapsable())
+          if (!result && (lin + 1 < COLUMNS) && map[col][lin+1]->type() == t && map[col][lin+1]->is_collapsable())
           {  
             c.second += 1;
             if (std::find(std::cbegin(exceptions), std::cend(exceptions), c) == std::cend(exceptions))
@@ -259,7 +259,7 @@ protected:
 
         bool coords_are_valid(const map_coordinates& coords)
         {
-          return coords.first >= 0 && coords.first <= COLUMNS && coords.second >= 0 && coords.second <= LINES && map[coords.first][coords.second].get() != nullptr;
+          return coords.first >= 0 && coords.first < COLUMNS && coords.second >= 0 && coords.second < LINES && map[coords.first][coords.second].get() != nullptr;
         }
         
 
@@ -427,7 +427,7 @@ print_subgroup:
             result.insert(result.end(), map[one_left_coords.first][one_left_coords.second].get());
             result.insert(result.end(), candidate);
           }
-          else if (one_right_coords.first <= COLUMNS && (candidate = get_jewel_in_vicinity_with_type(one_right_coords, center->type(), { right_coords } )))
+          else if (one_right_coords.first < COLUMNS && (candidate = get_jewel_in_vicinity_with_type(one_right_coords, center->type(), { right_coords } )))
           // we found a candidate for swapping with the jewel below the subgroup
           {
             result.insert(result.end(), map[one_right_coords.first][one_right_coords.second].get());
@@ -484,7 +484,7 @@ print_subgroup:
             result.insert(result.end(), map[above_coords.first][above_coords.second].get());
             result.insert(result.end(), candidate);
           }
-          else if (below_coords.first <= COLUMNS && (candidate = get_jewel_in_vicinity_with_type(below_coords, center->type(), { bottom_coords })))
+          else if (below_coords.first < COLUMNS && (candidate = get_jewel_in_vicinity_with_type(below_coords, center->type(), { bottom_coords })))
           // we found a candidate for swapping with the jewel below the subgroup
           {
             result.insert(result.end(), map[below_coords.first][below_coords.second].get());
@@ -633,8 +633,8 @@ print_subgroup:
                   continue;
 
                 auto curr_coords = make_map_coordinates_from_jewel(curr);
-                assert(curr_coords.first >= 0 && curr_coords.first <= COLUMNS);
-                assert(curr_coords.second >= 0 && curr_coords.second <= LINES); 
+                assert(curr_coords.first >= 0 && curr_coords.first < COLUMNS);
+                assert(curr_coords.second >= 0 && curr_coords.second < LINES); 
                 current_group = make_collapsing_group_from(curr_coords.first, curr_coords.second);
                 if (current_group.size() > group.size())
                   group = current_group;
@@ -770,7 +770,7 @@ public:
                 continue;
               }
               auto coords = make_map_coordinates_from_jewel(j);
-              assert(!j->has_arrived() || ((0 <= coords.first && coords.first <= COLUMNS) && (0 <= coords.second && coords.second <= LINES)));
+              assert(!j->has_arrived() || ((0 <= coords.first && coords.first < COLUMNS) && (0 <= coords.second && coords.second < LINES)));
               assert(j == map[coords.first][coords.second].get());
               j->vel(0);
               jewel_it = moving.erase(jewel_it);
@@ -795,8 +795,8 @@ public:
 
               auto coords = make_map_coordinates_from_jewel((*jewel_it)); 
               //columns_with_free_slots[coords.first].push(coords.second);
-              assert(coords.first >= 0 && coords.first <= COLUMNS);
-              assert(coords.second >= 0 && coords.second <= LINES); 
+              assert(coords.first >= 0 && coords.first < COLUMNS);
+              assert(coords.second >= 0 && coords.second < LINES); 
 
               jewel_it = collapsing.erase(jewel_it);
             }
@@ -861,10 +861,10 @@ public:
                   auto first_coords = make_map_coordinates_from_jewel(first.get());
                   auto second_coords = make_map_coordinates_from_jewel(second.get());
 
-                  assert(first_coords.first >= 0 && first_coords.first <= COLUMNS);
-                  assert(first_coords.first >= 0 && first_coords.first <= COLUMNS);
-                  assert(second_coords.second >= 0 && second_coords.second <= LINES); 
-                  assert(second_coords.second >= 0 && second_coords.second <= LINES); 
+                  assert(first_coords.first >= 0 && first_coords.first < COLUMNS);
+                  assert(first_coords.first >= 0 && first_coords.first < COLUMNS);
+                  assert(second_coords.second >= 0 && second_coords.second < LINES); 
+                  assert(second_coords.second >= 0 && second_coords.second < LINES); 
                   swap(first_coords,second_coords);
                   selected[0].reset();
                   selected[1].reset();
@@ -931,8 +931,8 @@ public:
           }
           
           auto&& jewel_coordinates = make_map_coordinates_from_screen(b.x, b.y);
-          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first <= COLUMNS) && 
-                (0 <= jewel_coordinates.second && jewel_coordinates.second <= LINES)))
+          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first < COLUMNS) && 
+                (0 <= jewel_coordinates.second && jewel_coordinates.second < LINES)))
           {
             std::cout << fn << "received a drag event from outside the grid.\n";
             return ;
@@ -976,8 +976,8 @@ public:
           }
 
           auto&& jewel_coordinates = make_map_coordinates_from_screen(b.x, b.y);
-          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first <= COLUMNS) && 
-                (0 <= jewel_coordinates.second && jewel_coordinates.second <= LINES)))
+          if (!((0 <= jewel_coordinates.first && jewel_coordinates.first < COLUMNS) && 
+                (0 <= jewel_coordinates.second && jewel_coordinates.second < LINES)))
           {
             std::cout << fn << "received a click from outside the grid." << std::endl;
             return ;
@@ -1085,12 +1085,12 @@ public:
           auto first = make_map_coordinates_from_col_and_lin(f_col, f_lin);
           auto second = make_map_coordinates_from_col_and_lin(s_col, s_lin);
 
-          assert(first.first >= 0 && first.first <= COLUMNS);
-          assert(first.second >= 0 && first.second <= LINES); 
+          assert(first.first >= 0 && first.first < COLUMNS);
+          assert(first.second >= 0 && first.second < LINES); 
           
           
-          assert(second.first >= 0 && second.first <= COLUMNS);
-          assert(second.second >= 0 && second.second <= LINES); 
+          assert(second.first >= 0 && second.first < COLUMNS);
+          assert(second.second >= 0 && second.second < LINES); 
           
           swap(first, second);
         }
@@ -1122,8 +1122,9 @@ public:
 
         void on_hint()
         {
-          if (collapsing.size() > 0 && moving.size() > 0)
+          if (collapsing.size() > 0 || moving.size() > 0)
             return ;
+          hints.clear();
           collapse_existing_groups();
           for (auto j : hints)
             j->animation( jewel_animation_type::GLOWING );
