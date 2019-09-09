@@ -1,11 +1,14 @@
-# CMakeFile for bejeweled
+# CMakeFile for space_nomad
 # Author: Frederico Marques
 cmake_minimum_required(VERSION 2.6)
-project(bejeweled)
+project(space_nomad)
 
-set(CMAKE_MODULE_PATH cmake)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}\\cmake")
 
-
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Includes 
 include(dependencies.helper)

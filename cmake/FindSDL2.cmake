@@ -136,9 +136,10 @@ endif()
 find_path(SDL2_INCLUDE_DIR SDL.h
   HINTS
     ENV SDL2DIR # Use SDL2DIR on Windows pointing to the SDL2 root.
-  PATH_SUFFIXES SDL2
-               # path suffixes to search inside ENV{SDLDIR}
-  include/SDL2 include
+  PATH_SUFFIXES # path suffixes to search inside ENV{SDLDIR}
+	SDL2
+    include/SDL2 
+	include
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
