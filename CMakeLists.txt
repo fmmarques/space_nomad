@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(space_nomad)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}\\cmake")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
@@ -42,12 +42,11 @@ include_directories(${SDL2_TTF_INCLUDE_DIRS})
 
 
 
-# define target bejeweled sources. 
-include_directories(AFTER SYSTEM 
-	${YAGE_INCLUDE_DIR}
-  ${SDL2_IMAGE_INCLUDE_DIRS}
-  include)
-set(BEJEWELED_SOURCES 
+# define target space_nomad sources. 
+include_directories(AFTER SYSTEM ${YAGE_INCLUDE_DIR} 
+	                         ${SDL2_IMAGE_INCLUDE_DIRS} 
+				 include)
+set(SPACE_NOMAD_SOURCES 
     src/bejeweled.cpp
   # states	
     src/states/main_menu.cpp
@@ -58,13 +57,37 @@ set(BEJEWELED_SOURCES
     src/widgets/grid_generators.cpp
     src/widgets/score.cpp
 )
-add_executable(bejeweled ${BEJEWELED_SOURCES}) 
-set_property(TARGET bejeweled PROPERTY CXX_STANDARD 17)
-set_target_properties(bejeweled
+add_executable(space_nomad ${BEJEWELED_SOURCES}) 
+set_property(TARGET space_nomad PROPERTY CXX_STANDARD 17)
+set_target_properties(space_nomad
 	PROPERTIES
 		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/bin")
+target_sources(space_nomad
+  PRIVATE
+    src/bejeweled.cpp
+  # states	
+    src/states/main_menu.cpp
+    src/states/base_game.cpp
+  # widgets
+    src/widgets/jewel.cpp
+    src/widgets/grid.cpp
+    src/widgets/grid_generators.cpp
+    src/widgets/score.cpp
+  PUBLIC
+    include/bejeweled.hpp
+    include/bejeweled/engine.hpp
+  # headers states
+    include/bejeweled/states/main_menu.hpp
+    include/bejeweled/states/base_game.hpp
+  # headers widget 
+    include/bejeweled/widgets/grid.hpp
+    include/bejeweled/widgets/grid_event_listener.hpp
+    include/bejeweled/widgets/grid_generators.hpp
+    include/bejeweled/widgets/jewel.hpp
+    include/bejeweled/widgets/score.hpp
+)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -g")
 # Dependencies
@@ -72,11 +95,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -g")
 if (${YAGE_LIBRARY} STREQUAL "YAGE_LIBRARY-NOT_FOUND")
   set_property(TARGET yage PROPERTY POSITION_INDEPENDENT_CODE ON)
   set(BUILD_SHARED_LIBRARIES ON)
-  add_dependencies(bejeweled yage)
+  add_dependencies(space_nomad yage)
 endif()
-target_link_libraries(bejeweled yage)
+target_link_libraries(space_nomad yage)
 
-add_custom_target(assets_directory ALL COMMAND ${CMAKE_COMMAND} -E copy_directory assets $<TARGET_FILE_DIR:bejeweled>/assets)
+add_custom_target(assets_directory ALL COMMAND ${CMAKE_COMMAND} -E copy_directory assets $<TARGET_FILE_DIR:space_nomad>/assets)
 #set_target_properties(assets_directory PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/bin")
 
 #file(GLOB textures ${CMAKE_SOURCE_DIR}/assets/*.jpeg
