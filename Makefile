@@ -137,17 +137,17 @@ assets_directory/fast:
 .PHONY : assets_directory/fast
 
 #=============================================================================
-# Target rules for targets named state_machine_test
+# Target rules for targets named state_machine_tests
 
 # Build rule for target.
-state_machine_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 state_machine_test
-.PHONY : state_machine_test
+state_machine_tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 state_machine_tests
+.PHONY : state_machine_tests
 
 # fast build rule for target.
-state_machine_test/fast:
-	$(MAKE) -f dependencies/yage/CMakeFiles/state_machine_test.dir/build.make dependencies/yage/CMakeFiles/state_machine_test.dir/build
-.PHONY : state_machine_test/fast
+state_machine_tests/fast:
+	$(MAKE) -f dependencies/yage/CMakeFiles/state_machine_tests.dir/build.make dependencies/yage/CMakeFiles/state_machine_tests.dir/build
+.PHONY : state_machine_tests/fast
 
 #=============================================================================
 # Target rules for targets named yage
@@ -163,6 +163,32 @@ yage/fast:
 .PHONY : yage/fast
 
 #=============================================================================
+# Target rules for targets named graphics_tests
+
+# Build rule for target.
+graphics_tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 graphics_tests
+.PHONY : graphics_tests
+
+# fast build rule for target.
+graphics_tests/fast:
+	$(MAKE) -f dependencies/yage/CMakeFiles/graphics_tests.dir/build.make dependencies/yage/CMakeFiles/graphics_tests.dir/build
+.PHONY : graphics_tests/fast
+
+#=============================================================================
+# Target rules for targets named widgets_tests
+
+# Build rule for target.
+widgets_tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 widgets_tests
+.PHONY : widgets_tests
+
+# fast build rule for target.
+widgets_tests/fast:
+	$(MAKE) -f dependencies/yage/CMakeFiles/widgets_tests.dir/build.make dependencies/yage/CMakeFiles/widgets_tests.dir/build
+.PHONY : widgets_tests/fast
+
+#=============================================================================
 # Target rules for targets named all_tests
 
 # Build rule for target.
@@ -174,19 +200,6 @@ all_tests: cmake_check_build_system
 all_tests/fast:
 	$(MAKE) -f dependencies/yage/CMakeFiles/all_tests.dir/build.make dependencies/yage/CMakeFiles/all_tests.dir/build
 .PHONY : all_tests/fast
-
-#=============================================================================
-# Target rules for targets named graphics_test
-
-# Build rule for target.
-graphics_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 graphics_test
-.PHONY : graphics_test
-
-# fast build rule for target.
-graphics_test/fast:
-	$(MAKE) -f dependencies/yage/CMakeFiles/graphics_test.dir/build.make dependencies/yage/CMakeFiles/graphics_test.dir/build
-.PHONY : graphics_test/fast
 
 #=============================================================================
 # Target rules for targets named gtest
@@ -413,10 +426,11 @@ help:
 	@echo "... bejeweled"
 	@echo "... rebuild_cache"
 	@echo "... assets_directory"
-	@echo "... state_machine_test"
+	@echo "... state_machine_tests"
 	@echo "... yage"
+	@echo "... graphics_tests"
+	@echo "... widgets_tests"
 	@echo "... all_tests"
-	@echo "... graphics_test"
 	@echo "... gtest"
 	@echo "... gtest_main"
 	@echo "... src/bejeweled.o"

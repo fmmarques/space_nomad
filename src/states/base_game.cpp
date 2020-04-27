@@ -24,30 +24,25 @@ base_game::base_game():
            yage::graphics::graphics_manager::instance().get_window().h()/2 - bejeweled::widgets::grid::JEWEL_HEIGHT * 4, 
            bejeweled::widgets::grid::JEWEL_WIDTH * bejeweled::widgets::grid::COLUMNS, 
            bejeweled::widgets::grid::JEWEL_HEIGHT * bejeweled::widgets::grid::LINES })
+, is_gameover{ false }
 , hint(
+    0,
+    0,
+    2,
+    2,
     yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 32),
     "Help me!",
-    32,
     [this]{ std::cout << "hint me!" << std::endl; this->grid.on_hint(); },
     (SDL_Color){ 0xFF, 0xFF, 0xFF, 0x0 },
     (SDL_Color){ 0xFF, 0x0, 0x0, 0x00 }
   )
-, hint_r { 
-    .x = yage::graphics::graphics_manager::instance().get_window().w()/2 - bejeweled::widgets::grid::JEWEL_WIDTH * (9), 
-         yage::graphics::graphics_manager::instance().get_window().h()/2 - bejeweled::widgets::grid::JEWEL_HEIGHT,
-         bejeweled::widgets::grid::JEWEL_WIDTH * 5,
-         bejeweled::widgets::grid::JEWEL_HEIGHT * 2 }
-, gameover_widget_r { 
-    .x = 10,
-         10, 
-         yage::graphics::graphics_manager::instance().get_window().w() - 10, 
-         yage::graphics::graphics_manager::instance().get_window().h() - 10 ,
-         }
-, gameover{ false }
-, gameover_widget{ 
+, gameover{
+    0,
+    0,
+    1,
+    1,
     yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 52),
     "Game over",
-    52,
     [this]{ 
       std::cout << "goto main menu" << std::endl;
       bejeweled::engine::instance().pop();
@@ -107,16 +102,16 @@ void base_game::on_interrupt()
 void base_game::on_frame()
 {
   auto&& r = yage::graphics::graphics_manager::instance().get_window();
-  if (!gameover)
+  if (!is_gameover)
   {
     SDL_RenderCopy(r, background, NULL, r);
     score.on_frame();
     grid.on_frame();
-    hint.render(&hint_r);
+    hint.render();
   }
   else
   {
-    gameover_widget.render(&gameover_widget_r);
+    gameover.render();
   }
 }
 
@@ -146,11 +141,11 @@ void base_game::on_mouse_button_down(const SDL_MouseButtonEvent& button)
   std::cout << fn << "button: " << std::to_string(button.button) << "; state: " << std::to_string(button.state) << "; clicks: " << std::to_string(button.clicks) << "; <x,y>=<" << button.x << "," <<button.y << ">"  << std::endl;
 
   auto&& m = mouse::instance();
-  std::cout << "is game over: " << std::boolalpha << gameover;
-  std::cout << "hovers: " << m.hovers(gameover_widget_r);
-  if (gameover &&m.hovers(gameover_widget_r))
+  std::cout << "is game over: " << std::boolalpha << is_gameover;
+  std::cout << "hovers: " << m.hovers(gameover);
+  if (is_gameover && m.hovers(gameover))
   {
-    gameover_widget.on_click();
+    gameover.on_click();
     return;
   }
 
@@ -162,7 +157,7 @@ void base_game::on_mouse_button_down(const SDL_MouseButtonEvent& button)
   grid.lose_focus();
 
   
-  if (m.hovers(hint_r))
+  if (m.hovers(hint))
   {
     hint.on_click();
     return;
@@ -196,7 +191,7 @@ void base_game::on_mouse_movement(const SDL_MouseMotionEvent& motion)
 void base_game::on_score_change(int new_score) {}
 void base_game::on_game_over() 
 {
-  gameover = true;
+  is_gameover = true;
 }
 
     }

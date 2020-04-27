@@ -36,10 +36,8 @@ private:
   yage::graphics::texture background;
   bejeweled::widgets::score score;
   bejeweled::widgets::grid grid;
-  yage::widgets::button hint;
-  SDL_Rect hint_r, gameover_widget_r;
-  bool gameover;
-  yage::widgets::button gameover_widget;
+  bool is_gameover;
+  yage::widgets::button  hint, gameover;
 protected:
 
 public:

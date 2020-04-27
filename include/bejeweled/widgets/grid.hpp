@@ -158,29 +158,8 @@ protected:
         // Initiates jewel movement by setting jewel's destination and velocity, and adding it to the moving bag
         // @param j the jewel to be moved
         // @param map_destination the map coordinates holding the destination.
-        void move_jewel(jewel* j, const map_coordinates& map_destination)
-        {
-          assert(j != nullptr);
-          assert(0 <= map_destination.first && map_destination.first < COLUMNS);
-          assert(0 <= map_destination.second && map_destination.second < LINES);
-
-          auto&& map_origin = make_map_coordinates_from_jewel(j);
-          if (map_origin.first == -1 || map_origin.second == -1)
-            return ;
-          assert(map_origin.first != map_destination.first || map_origin.second != map_destination.second);
-          
-          invariant();
-          auto screen_destination = make_screen_coordinates_from_map_coords(map_destination);
-          
-          j->dx(screen_destination.first);
-          j->dy(screen_destination.second);
-          j->vel(4);
-          
-          moving.insert(moving.end(), j);
-          
-          invariant();
-        }
-
+        void move_jewel(jewel* j, const map_coordinates& map_destination);
+        
         // Collapses a jewel by initiating the collapse animation and adding the jewel to the collapsing bag
         // @arg j the jewel that undergoes the collapse.
         void collapse_jewel(jewel* j)

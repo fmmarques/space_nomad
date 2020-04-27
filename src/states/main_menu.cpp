@@ -22,45 +22,37 @@ main_menu::main_menu():
 , options{ "New game", "Continue", "Exit" }
 , selected_option{option::UNDEFINED}
 , title {
+    yage::graphics::graphics_manager::instance().get_window().w() / 2,
+    yage::graphics::graphics_manager::instance().get_window().h() / 2,
     yage::graphics::font_manager::instance().load("assets/pac-font.ttf",32),
-    "BeJeWeLed",
-    (SDL_Color){ .r = 128, 128, 128, 0 },
-    32
+    "Space Nomad",
+    (SDL_Color){ .r = 128, 128, 128, 0 }
   }
-,  background{ yage::graphics::texture_manager::instance().load("assets/bejeweled.background.2.jpg") } //main_menu.background.1.jpg") }
-,  newgame {
-   yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 18),
-    "New game", 18, 
-    []{ 
-      bejeweled::engine::instance().push< bejeweled::states::base_game >(); 
-    }
-   }
-,  quitgame{
+, background{ yage::graphics::texture_manager::instance().load("assets/bejeweled.background.2.jpg") } //main_menu.background.1.jpg") }
+, newgame {
+    yage::graphics::graphics_manager::instance().get_window().w() / 2,
+    yage::graphics::graphics_manager::instance().get_window().h() / 2,
+    1,
+    1,
     yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 18),
-    "Exit", 18, 
-    []{ 
-      bejeweled::engine::instance().pop(); 
-      SDL_Event q { .type = SDL_QUIT };
-      SDL_PushEvent(&q);
-    }
+    "New game", 
+    [] {  bejeweled::engine::instance().push< bejeweled::states::base_game >(); },
+    (SDL_Color) { .r = 0x00, 0x00, 0x00, 0xff },
+    (SDL_Color) { .r = 0xf0, 0xf0, 0xf0, 0xff }
    }
-,  title_r {
-    .x = yage::graphics::graphics_manager::instance().get_window().w() / 2 - title.w()/2,
-         yage::graphics::graphics_manager::instance().get_window().h() / 2 - title.h()*3,
-         title.w(),
-         title.h()
+,  quitgame {
+    yage::graphics::graphics_manager::instance().get_window().w() / 2,
+    yage::graphics::graphics_manager::instance().get_window().h() / 2,
+    1,
+    1,
+    yage::graphics::font_manager::instance().load("assets/arcade_classic.ttf", 18),
+    "Exit", 
+    []{  bejeweled::engine::instance().pop(); 
+         SDL_Event q { .type = SDL_QUIT };
+         SDL_PushEvent(&q);                   },
+    (SDL_Color) { .r = 0x00, 0x00, 0x00, 0xff },
+    (SDL_Color) { .r = 0xf0, 0xf0, 0xf0, 0xff }
    }
-,  newgame_r { 
-    .x=yage::graphics::graphics_manager::instance().get_window().w()/2 - newgame.w(), 
-       yage::graphics::graphics_manager::instance().get_window().h()/2 - newgame.h(),
-       newgame.w()*2,
-       newgame.h() }
-,  quitgame_r { 
-    .x=yage::graphics::graphics_manager::instance().get_window().w()/2 - newgame.w(), 
-       yage::graphics::graphics_manager::instance().get_window().h()/2 + newgame.h(),
-       newgame.w()*2,
-       newgame.h() }
- 
 {
 
 }
@@ -105,33 +97,14 @@ void main_menu::on_frame()
 {
   auto&& r = yage::graphics::graphics_manager::instance().get_window();
  SDL_RenderCopy(r, background, NULL, r);
-  title.render(&title_r);
-  newgame.render(&newgame_r);
-  quitgame.render(&quitgame_r);
+  title.render();
+  newgame.render();
+  quitgame.render();
 
 }
-/*
-void main_menu::on_keycode_pressed(const SDL_Keysym& keysym) 
-{
-  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-  std::cout << fn << "key code: " << keysym.sym << std::endl;
-}
 
-void main_menu::on_keycode_released(const SDL_Keysym& keysym) 
-{
-  std::string fn { std::string( __PRETTY_FUNCTION__ ) + ": "};
-  std::cout << fn << "key code: " << keysym.sym << std::endl;
-
-}
-*/
 void main_menu::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
-  if ( newgame_r.x <= button.x && newgame_r.x + newgame_r.w >= button.x && 
-       newgame_r.y <= button.y && newgame_r.y + newgame_r.h >= button.y   )
-    newgame.on_click();
-  if ( quitgame_r.x <= button.x && quitgame_r.x + quitgame_r.w >= button.x && 
-       quitgame_r.y <= button.y && quitgame_r.y + quitgame_r.h >= button.y   )
-    quitgame.on_click();
 }
 
 void main_menu::on_mouse_button_up(const SDL_MouseButtonEvent& button)
