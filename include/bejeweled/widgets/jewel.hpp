@@ -1,7 +1,7 @@
 #if !defined(BEJEWELED_WIDGETS_JEWEL_HPP)
 #  define BEJEWELED_WIDGETS_JEWEL_HPP
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <yage/graphics/spritesheet.hpp>
 
